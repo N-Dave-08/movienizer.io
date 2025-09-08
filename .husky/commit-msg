@@ -1,0 +1,31 @@
+# Validate commit message format
+commit_regex='^(feat|fix|docs|style|refactor|test|chore|perf|ci|build|revert)(\(.+\))?: .{1,50}'
+
+if ! grep -qE "$commit_regex" "$1"; then
+  echo "🚫 Invalid commit message format!"
+  echo ""
+  echo "Your commit message should follow the conventional commit format:"
+  echo "  <type>[optional scope]: <description>"
+  echo ""
+  echo "Types:"
+  echo "  feat:     A new feature"
+  echo "  fix:      A bug fix"
+  echo "  docs:     Documentation changes"
+  echo "  style:    Code style changes (formatting, etc.)"
+  echo "  refactor: Code refactoring"
+  echo "  test:     Adding or updating tests"
+  echo "  chore:    Maintenance tasks"
+  echo "  perf:     Performance improvements"
+  echo "  ci:       CI/CD changes"
+  echo "  build:    Build system changes"
+  echo "  revert:   Reverting previous commits"
+  echo ""
+  echo "Examples:"
+  echo "  feat: add user authentication"
+  echo "  fix: resolve login bug"
+  echo "  docs: update README"
+  echo "  feat(auth): implement OAuth login"
+  echo ""
+  echo "Your message: $(cat $1)"
+  exit 1
+fi 
