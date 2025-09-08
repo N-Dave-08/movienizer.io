@@ -1,0 +1,13 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Check for console.log statements in staged files
+if git diff --cached --name-only | grep -E '\.(js|jsx|ts|tsx)$' | xargs grep -l 'console\.log' 2>/dev/null; then
+  echo "🚫 Commit rejected: console.log statements found in staged files!"
+  echo "Please remove all console.log statements before committing."
+  echo "Found in the following files:"
+  git diff --cached --name-only | grep -E '\.(js|jsx|ts|tsx)$' | xargs grep -l 'console\.log' 2>/dev/null
+  exit 1
+fi
+
+pnpx lint-staged
