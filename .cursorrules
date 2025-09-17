@@ -1,0 +1,14 @@
+// File Naming Rules:
+// - All filenames must use kebab-case (lowercase letters, numbers, and hyphens only, e.g., "my-component.tsx").
+// - Do not use camelCase, PascalCase, or underscores in filenames.
+
+// UI Library Rules:
+// - Always use DaisyUI version 5.1.12 for all interface components and styling.
+// - Do not use other versions of DaisyUI or alternative UI libraries for interface elements.
+
+// Icon Rules:
+// - For all icons, use the "lucide-react" library.
+// - Do not use other icon libraries (such as Heroicons, FontAwesome, etc.).
+
+// Backend-as-a-Service (BaaS) Rules:
+// - This project uses Supabase as the backend-as-a-service (BaaS) provider.
