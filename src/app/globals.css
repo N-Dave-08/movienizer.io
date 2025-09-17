@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @plugin "daisyui" {
+  /* biome-ignore lint/correctness/noUnknownProperty: themes is valid in DaisyUI v5 */
   themes: all;
 }
 /* @import "tw-animate-css"; */
