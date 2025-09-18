@@ -39,7 +39,6 @@ export default function SignupForm() {
     emailSent: false,
   });
   const [isLoading, setIsLoading] = useState(false);
-  const [rememberMe, setRememberMe] = useState(true); // Default to true as per best practice
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -93,8 +92,8 @@ export default function SignupForm() {
     }
 
     try {
-      // Create Supabase client with the user's remember me preference
-      const supabase = createClient(rememberMe);
+      // Create Supabase client
+      const supabase = createClient();
 
       const { error } = await supabase.auth.signInWithOtp({
         email,
@@ -212,24 +211,6 @@ export default function SignupForm() {
             </span>
           </div>
         )}
-
-        {/* Remember Me Checkbox */}
-        <div className="form-control mt-4">
-          <label className="label cursor-pointer justify-start gap-3 pb-1">
-            <input
-              type="checkbox"
-              checked={rememberMe}
-              onChange={(e) => setRememberMe(e.target.checked)}
-              className="checkbox checkbox-sm"
-            />
-            <span className="label-text">Remember me</span>
-          </label>
-          <p className="text-sm text-base-content/60 ml-7">
-            {rememberMe
-              ? "Stay signed in across browser sessions"
-              : "Sign out when browser is closed"}
-          </p>
-        </div>
 
         <button
           type="submit"

@@ -19,23 +19,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     const state = get();
     if (state.initialized) return;
 
-    // Check both localStorage and sessionStorage to determine which one has the session
-    // This handles cases where user might have sessions in either storage
-    let supabase = createClient(true); // Try localStorage first
-    let session = null;
-
     try {
-      // Try localStorage first
-      const localStorageResult = await supabase.auth.getSession();
-      if (localStorageResult.data.session) {
-        session = localStorageResult.data.session;
-      } else {
-        // If no session in localStorage, try sessionStorage
-        supabase = createClient(false);
-        const sessionStorageResult = await supabase.auth.getSession();
-        if (sessionStorageResult.data.session) {
-          session = sessionStorageResult.data.session;
-        }
+      const supabase = createClient();
+      const {
+        data: { session },
+        error,
+      } = await supabase.auth.getSession();
+
+      if (error) {
+        console.error("Error getting session:", error);
       }
 
       set({
@@ -44,19 +36,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         initialized: true,
       });
 
-      // Listen for auth changes - we need to listen on both clients
-      // But in practice, only one will have active sessions
-      const localStorageClient = createClient(true);
-      const sessionStorageClient = createClient(false);
-
-      localStorageClient.auth.onAuthStateChange((_, session) => {
-        set({
-          user: session?.user ?? null,
-          loading: false,
-        });
-      });
-
-      sessionStorageClient.auth.onAuthStateChange((_, session) => {
+      // Listen for auth changes
+      supabase.auth.onAuthStateChange((_, session) => {
         set({
           user: session?.user ?? null,
           loading: false,
@@ -80,15 +61,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         loading: false,
       });
 
-      // Clear sessions from both localStorage and sessionStorage
-      const localStorageClient = createClient(true);
-      const sessionStorageClient = createClient(false);
-
-      // Sign out from both clients to ensure complete cleanup
-      await Promise.allSettled([
-        localStorageClient.auth.signOut(),
-        sessionStorageClient.auth.signOut(),
-      ]);
+      // Clear session
+      const supabase = createClient();
+      await supabase.auth.signOut();
 
       // Server-side logout (always succeeds due to robust error handling)
       await fetch("/auth/signout", {

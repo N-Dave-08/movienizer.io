@@ -55,7 +55,7 @@ export async function middleware(request: NextRequest) {
 
   if (user && ["/login", "/signup"].includes(pathname)) {
     const url = request.nextUrl.clone();
-    url.pathname = "/dashboard";
+    url.pathname = "/watchlist";
     return NextResponse.redirect(url);
   }
 

@@ -1,7 +1,7 @@
 import { createBrowserClient } from "@supabase/ssr";
 
-// Default client with localStorage (remember me enabled by default)
-export function createClient(rememberMe = true) {
+// Default client with localStorage for persistent sessions
+export function createClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
@@ -11,7 +11,7 @@ export function createClient(rememberMe = true) {
 
   return createBrowserClient(supabaseUrl, supabaseAnonKey, {
     auth: {
-      storage: rememberMe ? localStorage : sessionStorage,
+      storage: localStorage,
       persistSession: true,
     },
   });
