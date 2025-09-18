@@ -1,13 +1,23 @@
 "use client";
 
-import { LogOut, User } from "lucide-react";
+import { Bookmark, LogOut, Search, User } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { useAuthStore } from "@/lib/stores/auth-store";
+import { useWatchlistStore } from "@/lib/stores/watchlist-store";
 
 export default function Header() {
   const router = useRouter();
   const { user, loading, signOut } = useAuthStore();
+  const { items, loadWatchlist, initialized } = useWatchlistStore();
+
+  // Load watchlist when user is available
+  useEffect(() => {
+    if (user && !initialized) {
+      loadWatchlist();
+    }
+  }, [user, initialized, loadWatchlist]);
 
   const handleSignOut = async () => {
     await signOut(() => {
@@ -21,10 +31,10 @@ export default function Header() {
 
     // Check for username in user metadata
     const username = user.user_metadata?.username;
-    const displayName = user.user_metadata?.display_name;
+    // const displayName = user.user_metadata?.display_name;
 
     if (username) return `@${username}`;
-    if (displayName) return displayName;
+
     return user.email || "";
   };
 
@@ -37,6 +47,30 @@ export default function Header() {
           </button>
 
           <div className="flex items-center gap-2">
+            {user && (
+              <>
+                <Link
+                  href="/discover"
+                  className="btn btn-ghost btn-circle"
+                  title="Discover Movies & Series"
+                >
+                  <Search className="h-5 w-5" />
+                </Link>
+                <Link
+                  href="/watchlist"
+                  className="btn btn-ghost btn-circle relative"
+                  title="My Watchlist"
+                >
+                  <Bookmark className="h-5 w-5" />
+                  {items.length > 0 && (
+                    <div className="badge badge-sm badge-primary absolute -top-1 -right-1">
+                      {items.length > 99 ? "99+" : items.length}
+                    </div>
+                  )}
+                </Link>
+              </>
+            )}
+
             {loading ? (
               <span className="loading loading-spinner loading-sm"></span>
             ) : user ? (
@@ -73,10 +107,10 @@ export default function Header() {
             ) : (
               <>
                 <button type="button" className="btn btn-ghost">
-                  <Link href="/login">Sign In</Link>
+                  <Link href="/login">Login</Link>
                 </button>
                 <button type="button" className="btn btn-primary">
-                  <Link href="/signup">Get Started</Link>
+                  <Link href="/register">Register</Link>
                 </button>
               </>
             )}

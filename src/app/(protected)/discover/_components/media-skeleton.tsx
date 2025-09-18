@@ -1,8 +1,8 @@
 export function MediaSkeleton() {
-  return <figure className="w-full h-80 bg-neutral rounded-sm animate-pulse" />;
+  return <figure className="w-52 h-72 bg-neutral rounded-sm animate-pulse" />;
 }
 
-export function MediaSkeletonGrid({ count = 8 }: { count?: number }) {
+export function MediaSkeletonGrid({ count = 4 }: { count?: number }) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
       {Array.from({ length: count }, (_, index) => (

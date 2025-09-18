@@ -1,18 +1,53 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { AlertCircle, Film, RefreshCw, TrendingUp, Tv } from "lucide-react";
-import { useState } from "react";
+import {
+  AlertCircle,
+  Film,
+  RefreshCw,
+  Search,
+  TrendingUp,
+  Tv,
+  X,
+} from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import { MediaCard } from "@/app/(protected)/discover/_components/media-card";
 import { MediaSkeletonGrid } from "@/app/(protected)/discover/_components/media-skeleton";
-import { getTrendingMovies, getTrendingTVShows } from "@/lib/tmbd/tmdb";
+import {
+  getTrendingMovies,
+  getTrendingTVShows,
+  searchMovies,
+  searchTVShows,
+} from "@/lib/tmbd/tmdb";
 
 type TimeWindow = "day" | "week";
 type ContentType = "movies" | "tv" | "all";
 
+// Custom hook for debounced search
+function useDebounce(value: string, delay: number) {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+}
+
 export default function Discover() {
   const [timeWindow, setTimeWindow] = useState<TimeWindow>("week");
   const [contentType, setContentType] = useState<ContentType>("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const debouncedSearchQuery = useDebounce(searchQuery, 500);
+
+  // Determine if we're in search mode
+  const isSearchMode = debouncedSearchQuery.trim().length > 0;
 
   // Fetch trending movies
   const {
@@ -23,11 +58,12 @@ export default function Discover() {
   } = useQuery({
     queryKey: ["trending-movies", timeWindow],
     queryFn: () => getTrendingMovies(timeWindow),
-    enabled: contentType === "movies" || contentType === "all",
+    enabled:
+      !isSearchMode && (contentType === "movies" || contentType === "all"),
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
-  // Fetch trending TV shows
+  // Fetch trending Series
   const {
     data: tvData,
     isLoading: tvLoading,
@@ -36,20 +72,84 @@ export default function Discover() {
   } = useQuery({
     queryKey: ["trending-tv", timeWindow],
     queryFn: () => getTrendingTVShows(timeWindow),
-    enabled: contentType === "tv" || contentType === "all",
+    enabled: !isSearchMode && (contentType === "tv" || contentType === "all"),
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
-  const movies = moviesData?.results || [];
-  const tvShows = tvData?.results || [];
-  const loading = moviesLoading || tvLoading;
-  const error = moviesError || tvError;
+  // Search movies
+  const {
+    data: searchMoviesData,
+    isLoading: searchMoviesLoading,
+    error: searchMoviesError,
+    refetch: refetchSearchMovies,
+  } = useQuery({
+    queryKey: ["search-movies", debouncedSearchQuery],
+    queryFn: () => searchMovies(debouncedSearchQuery),
+    enabled:
+      isSearchMode && (contentType === "movies" || contentType === "all"),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
 
-  // Watchlist functionality is now handled directly in MediaCard component
+  // Search Series
+  const {
+    data: searchTVData,
+    isLoading: searchTVLoading,
+    error: searchTVError,
+    refetch: refetchSearchTV,
+  } = useQuery({
+    queryKey: ["search-tv", debouncedSearchQuery],
+    queryFn: () => searchTVShows(debouncedSearchQuery),
+    enabled: isSearchMode && (contentType === "tv" || contentType === "all"),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+
+  // Combine data based on mode
+  const movies = useMemo(() => {
+    if (isSearchMode) {
+      return searchMoviesData?.results || [];
+    }
+    return moviesData?.results || [];
+  }, [isSearchMode, searchMoviesData, moviesData]);
+
+  const tvShows = useMemo(() => {
+    if (isSearchMode) {
+      return searchTVData?.results || [];
+    }
+    return tvData?.results || [];
+  }, [isSearchMode, searchTVData, tvData]);
+
+  const loading = useMemo(() => {
+    if (isSearchMode) {
+      return searchMoviesLoading || searchTVLoading;
+    }
+    return moviesLoading || tvLoading;
+  }, [
+    isSearchMode,
+    searchMoviesLoading,
+    searchTVLoading,
+    moviesLoading,
+    tvLoading,
+  ]);
+
+  const error = useMemo(() => {
+    if (isSearchMode) {
+      return searchMoviesError || searchTVError;
+    }
+    return moviesError || tvError;
+  }, [isSearchMode, searchMoviesError, searchTVError, moviesError, tvError]);
 
   const handleRetry = () => {
-    refetchMovies();
-    refetchTV();
+    if (isSearchMode) {
+      refetchSearchMovies();
+      refetchSearchTV();
+    } else {
+      refetchMovies();
+      refetchTV();
+    }
+  };
+
+  const clearSearch = () => {
+    setSearchQuery("");
   };
 
   const renderContent = () => {
@@ -80,7 +180,7 @@ export default function Discover() {
           <p className="text-base-content/70 mb-4 text-center max-w-md">
             {error instanceof Error
               ? error.message
-              : "Failed to fetch trending content"}
+              : `Failed to ${isSearchMode ? "search" : "fetch trending"} content`}
           </p>
           <button
             type="button"
@@ -99,12 +199,20 @@ export default function Discover() {
     if (!hasContent) {
       return (
         <div className="flex flex-col items-center justify-center py-12">
-          <TrendingUp className="w-12 h-12 text-base-content/50 mb-4" />
+          {isSearchMode ? (
+            <Search className="w-12 h-12 text-base-content/50 mb-4" />
+          ) : (
+            <TrendingUp className="w-12 h-12 text-base-content/50 mb-4" />
+          )}
           <h3 className="text-lg font-semibold mb-2">
-            No trending content found
+            {isSearchMode
+              ? "No search results found"
+              : "No trending content found"}
           </h3>
           <p className="text-base-content/70 text-center max-w-md">
-            Try adjusting your filters or check back later.
+            {isSearchMode
+              ? `No results found for "${debouncedSearchQuery}". Try different keywords.`
+              : "Try adjusting your filters or check back later."}
           </p>
         </div>
       );
@@ -117,7 +225,7 @@ export default function Discover() {
             <section>
               <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
                 <Film className="w-6 h-6" />
-                Trending Movies
+                {isSearchMode ? "Movies" : "Trending Movies"}
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                 {movies.map((movie) => (
@@ -132,7 +240,7 @@ export default function Discover() {
             <section>
               <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
                 <Tv className="w-6 h-6" />
-                Trending TV Shows
+                {isSearchMode ? "Series" : "Trending Series"}
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                 {tvShows.map((tvShow) => (
@@ -151,39 +259,99 @@ export default function Discover() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-3">
-            <TrendingUp className="w-8 h-8" />
-            Discover
+            {isSearchMode ? (
+              <Search className="w-8 h-8" />
+            ) : (
+              <TrendingUp className="w-8 h-8" />
+            )}
+            {isSearchMode ? "Search Results" : "Discover"}
           </h1>
           <p className="text-base-content/70 mt-2">
-            Explore trending movies and TV shows
+            {isSearchMode
+              ? `Showing results for "${debouncedSearchQuery}"`
+              : "Explore trending movies and series"}
           </p>
         </div>
       </div>
 
-      {/* Filters */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between bg-base-200 p-4 rounded-lg">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
-          <span className="font-medium">Time Period:</span>
-          <div className="join space-x-2">
+      {/* Search Bar */}
+      <div className="w-full">
+        <label className="input w-full">
+          <Search className="h-[1em] opacity-50" />
+          <input
+            type="text"
+            placeholder="Search for movies and series..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          {searchQuery && (
             <button
               type="button"
-              className={`btn join-item btn-sm ${timeWindow === "day" ? "btn-primary" : "btn-outline"}`}
-              onClick={() => setTimeWindow("day")}
+              onClick={clearSearch}
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-base-content/50 hover:text-base-content"
             >
-              Today
+              <X className="w-5 h-5" />
             </button>
-            <button
-              type="button"
-              className={`btn join-item btn-sm ${timeWindow === "week" ? "btn-primary" : "btn-outline"}`}
-              onClick={() => setTimeWindow("week")}
-            >
-              This Week
-            </button>
+          )}
+        </label>
+      </div>
+
+      {/* Filters - Only show when not in search mode */}
+      {!isSearchMode && (
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between bg-base-200 p-4 rounded-lg">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
+            <span className="font-medium">Time Period:</span>
+            <div className="join space-x-2">
+              <button
+                type="button"
+                className={`btn join-item btn-sm ${timeWindow === "day" ? "btn-primary" : "btn-outline"}`}
+                onClick={() => setTimeWindow("day")}
+              >
+                Today
+              </button>
+              <button
+                type="button"
+                className={`btn join-item btn-sm ${timeWindow === "week" ? "btn-primary" : "btn-outline"}`}
+                onClick={() => setTimeWindow("week")}
+              >
+                This Week
+              </button>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
+            <span className="font-medium">Content:</span>
+            <div className="join space-x-2">
+              <button
+                type="button"
+                className={`btn join-item btn-sm ${contentType === "all" ? "btn-primary" : "btn-outline"}`}
+                onClick={() => setContentType("all")}
+              >
+                All
+              </button>
+              <button
+                type="button"
+                className={`btn join-item btn-sm ${contentType === "movies" ? "btn-primary" : "btn-outline"}`}
+                onClick={() => setContentType("movies")}
+              >
+                Movies
+              </button>
+              <button
+                type="button"
+                className={`btn join-item btn-sm ${contentType === "tv" ? "btn-primary" : "btn-outline"}`}
+                onClick={() => setContentType("tv")}
+              >
+                Series
+              </button>
+            </div>
           </div>
         </div>
+      )}
 
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
-          <span className="font-medium">Content:</span>
+      {/* Content Type Filter for Search Mode */}
+      {isSearchMode && (
+        <div className="flex items-center gap-4 bg-base-200 p-4 rounded-lg">
+          <span className="font-medium">Filter Results:</span>
           <div className="join space-x-2">
             <button
               type="button"
@@ -204,11 +372,11 @@ export default function Discover() {
               className={`btn join-item btn-sm ${contentType === "tv" ? "btn-primary" : "btn-outline"}`}
               onClick={() => setContentType("tv")}
             >
-              TV Shows
+              Series
             </button>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Content */}
       {renderContent()}
