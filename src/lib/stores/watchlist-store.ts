@@ -21,6 +21,10 @@ interface WatchlistState {
     updates: Partial<WatchlistItem>,
   ) => Promise<void>;
   isInWatchlist: (tmdbId: number, mediaType: "movie" | "tv") => boolean;
+  getWatchlistItem: (
+    tmdbId: number,
+    mediaType: "movie" | "tv",
+  ) => WatchlistItem | null;
   clearError: () => void;
 }
 
@@ -170,6 +174,15 @@ export const useWatchlistStore = create<WatchlistState>((set, get) => ({
     const state = get();
     return state.items.some(
       (item) => item.tmdb_id === tmdbId && item.media_type === mediaType,
+    );
+  },
+
+  getWatchlistItem: (tmdbId: number, mediaType: "movie" | "tv") => {
+    const state = get();
+    return (
+      state.items.find(
+        (item) => item.tmdb_id === tmdbId && item.media_type === mediaType,
+      ) || null
     );
   },
 

@@ -1,10 +1,10 @@
 "use client";
 
-import { Bookmark } from "lucide-react";
 import Image from "next/image";
-import { useEffect, useState } from "react";
-import { useWatchlistStore } from "@/lib/stores/watchlist-store";
 import { getImageUrl, type Movie, type TVShow } from "@/lib/tmbd/tmdb";
+import { useMediaCardState } from "../_hooks/use-media-card-state";
+import { MediaCardButtons } from "./media-card-buttons";
+import { WatchedOverlay } from "./watched-overlay";
 
 interface MediaCardProps {
   item: Movie | TVShow;
@@ -13,60 +13,17 @@ interface MediaCardProps {
 
 export function MediaCard({ item, type }: MediaCardProps) {
   const {
-    isInWatchlist,
-    addToWatchlist,
-    removeFromWatchlist,
-    loadWatchlist,
-    initialized,
-  } = useWatchlistStore();
-
-  const [isLoading, setIsLoading] = useState(false);
-  const [optimisticState, setOptimisticState] = useState<boolean | null>(null);
+    displayInWatchlist,
+    displayWatched,
+    isLoading,
+    isWatchedLoading,
+    handleToggleWatchlist,
+    handleToggleWatched,
+  } = useMediaCardState(item, type);
 
   const title =
     type === "movie" ? (item as Movie).title : (item as TVShow).name;
   const posterUrl = getImageUrl(item.poster_path, "w300");
-
-  // Use optimistic state if available, otherwise use actual state
-  const actualInWatchlist = isInWatchlist(item.id, type);
-  const displayInWatchlist =
-    optimisticState !== null ? optimisticState : actualInWatchlist;
-
-  // Load watchlist on first mount
-  useEffect(() => {
-    if (!initialized) {
-      loadWatchlist();
-    }
-  }, [initialized, loadWatchlist]);
-
-  // Reset optimistic state when actual state changes
-  useEffect(() => {
-    if (optimisticState !== null && optimisticState === actualInWatchlist) {
-      setOptimisticState(null);
-    }
-  }, [actualInWatchlist, optimisticState]);
-
-  const handleToggleWatchlist = async () => {
-    if (isLoading) return; // Prevent double clicks
-
-    setIsLoading(true);
-    const newState = !displayInWatchlist;
-    setOptimisticState(newState);
-
-    try {
-      if (actualInWatchlist) {
-        await removeFromWatchlist(item.id, type);
-      } else {
-        await addToWatchlist(item, type);
-      }
-    } catch {
-      // Revert optimistic state on error
-      setOptimisticState(!newState);
-      // Error is handled by the store, just revert optimistic state
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   return (
     <figure className="group relative w-52 h-72 bg-base-100 shadow-lg hover:scale-105 hover:shadow-xl transition-all duration-300 rounded-sm">
@@ -85,29 +42,17 @@ export function MediaCard({ item, type }: MediaCardProps) {
           <span className="text-base-content/50">No Image</span>
         </div>
       )}
-      <div
-        className={`absolute top-2 right-2 transition-opacity duration-200 ${
-          displayInWatchlist
-            ? "opacity-100"
-            : "opacity-0 group-hover:opacity-100"
-        }`}
-      >
-        <button
-          type="button"
-          onClick={handleToggleWatchlist}
-          className="p-2 rounded-full bg-black/20 hover:bg-black/40 transition-colors backdrop-blur-sm"
-          title={
-            displayInWatchlist ? "Remove from Watchlist" : "Add to Watchlist"
-          }
-          disabled={isLoading}
-        >
-          <Bookmark
-            className={`w-5 h-5 transition-colors ${
-              displayInWatchlist ? "fill-accent text-accent" : "text-white"
-            }`}
-          />
-        </button>
-      </div>
+
+      <WatchedOverlay isWatched={displayWatched} />
+
+      <MediaCardButtons
+        displayWatched={displayWatched}
+        displayInWatchlist={displayInWatchlist}
+        isLoading={isLoading}
+        isWatchedLoading={isWatchedLoading}
+        onToggleWatched={handleToggleWatched}
+        onToggleWatchlist={handleToggleWatchlist}
+      />
     </figure>
   );
 }
