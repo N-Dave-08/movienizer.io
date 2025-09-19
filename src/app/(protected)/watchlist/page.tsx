@@ -7,6 +7,8 @@ import { useEffect, useState } from "react";
 import { MediaSkeletonGrid } from "@/app/(protected)/discover/_components/media-skeleton";
 import { useAuthStore } from "@/lib/stores/auth-store";
 import { useWatchlistStore } from "@/lib/stores/watchlist-store";
+import type { WatchlistItem } from "@/lib/types/database";
+import { EpisodeModal } from "./_components/episode-modal";
 import { WatchlistCard } from "./_components/watchlist-card";
 
 export default function Watchlist() {
@@ -16,6 +18,10 @@ export default function Watchlist() {
   const [filter, setFilter] = useState<"all" | "watched" | "unwatched">("all");
   const [typeFilter, setTypeFilter] = useState<"all" | "movie" | "tv">("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedTVShow, setSelectedTVShow] = useState<WatchlistItem | null>(
+    null,
+  );
+  const [isEpisodeModalOpen, setIsEpisodeModalOpen] = useState(false);
 
   // Load watchlist when component mounts
   useEffect(() => {
@@ -28,6 +34,18 @@ export default function Watchlist() {
   useEffect(() => {
     return () => clearError();
   }, [clearError]);
+
+  const handleEpisodeView = (item: WatchlistItem) => {
+    setSelectedTVShow(item);
+    setIsEpisodeModalOpen(true);
+  };
+
+  const handleCloseEpisodeModal = () => {
+    setIsEpisodeModalOpen(false);
+    setSelectedTVShow(null);
+    // Reload watchlist to update progress
+    loadWatchlist();
+  };
 
   if (authLoading) {
     return (
@@ -204,12 +222,23 @@ export default function Watchlist() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {filteredItems.map((item) => (
-                <WatchlistCard key={item.id} item={item} />
+                <WatchlistCard
+                  key={item.id}
+                  item={item}
+                  onEpisodeView={handleEpisodeView}
+                />
               ))}
             </div>
           )}
         </>
       )}
+
+      {/* Episode Modal */}
+      <EpisodeModal
+        watchlistItem={selectedTVShow}
+        isOpen={isEpisodeModalOpen}
+        onClose={handleCloseEpisodeModal}
+      />
     </>
   );
 }

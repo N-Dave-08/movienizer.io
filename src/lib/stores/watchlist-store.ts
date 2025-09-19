@@ -11,7 +11,11 @@ interface WatchlistState {
 
   // Actions
   loadWatchlist: () => Promise<void>;
-  addToWatchlist: (item: Movie | TVShow, type: "movie" | "tv") => Promise<void>;
+  addToWatchlist: (
+    item: Movie | TVShow,
+    type: "movie" | "tv",
+    watched?: boolean,
+  ) => Promise<void>;
   removeFromWatchlist: (
     tmdbId: number,
     mediaType: "movie" | "tv",
@@ -48,7 +52,11 @@ export const useWatchlistStore = create<WatchlistState>((set, get) => ({
     }
   },
 
-  addToWatchlist: async (item: Movie | TVShow, type: "movie" | "tv") => {
+  addToWatchlist: async (
+    item: Movie | TVShow,
+    type: "movie" | "tv",
+    watched = false,
+  ) => {
     const state = get();
 
     // Check if already in watchlist
@@ -71,9 +79,15 @@ export const useWatchlistStore = create<WatchlistState>((set, get) => ({
           : (item as TVShow).first_air_date,
       vote_average: item.vote_average,
       added_at: new Date().toISOString(),
-      watched: false,
+      watched: watched,
       user_rating: null,
       notes: null,
+      // Initialize episode tracking fields for TV shows
+      total_episodes: type === "tv" ? 0 : undefined,
+      watched_episodes: type === "tv" ? (watched ? 0 : 0) : undefined,
+      current_season: type === "tv" ? 1 : undefined,
+      current_episode: type === "tv" ? 1 : undefined,
+      last_watched_at: watched ? new Date().toISOString() : undefined,
     };
 
     set((state) => ({
@@ -82,8 +96,7 @@ export const useWatchlistStore = create<WatchlistState>((set, get) => ({
     }));
 
     try {
-      // Make actual API call
-      const newItem = await watchlistService.addToWatchlist({
+      const itemData = {
         tmdb_id: item.id,
         media_type: type,
         title: optimisticItem.title,
@@ -91,7 +104,24 @@ export const useWatchlistStore = create<WatchlistState>((set, get) => ({
         overview: item.overview,
         release_date: optimisticItem.release_date,
         vote_average: item.vote_average,
-      });
+      };
+
+      let newItem: WatchlistItem;
+
+      if (type === "tv" && watched) {
+        // Use the special function for TV shows marked as watched
+        newItem = await watchlistService.addTVShowAsWatched(itemData);
+      } else {
+        // Regular add to watchlist
+        newItem = await watchlistService.addToWatchlist(itemData);
+
+        // If it was marked as watched, update it
+        if (watched) {
+          newItem = await watchlistService.updateWatchlistItem(newItem.id, {
+            watched: true,
+          });
+        }
+      }
 
       // Replace optimistic item with real item
       set((state) => ({

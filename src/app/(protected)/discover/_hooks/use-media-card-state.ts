@@ -80,11 +80,8 @@ export function useMediaCardState(item: Movie | TVShow, type: "movie" | "tv") {
       setOptimisticWatched(true);
 
       try {
-        await addToWatchlist(item, type);
-        const newWatchlistItem = getWatchlistItem(item.id, type);
-        if (newWatchlistItem) {
-          await updateWatchlistItem(newWatchlistItem.id, { watched: true });
-        }
+        // Add to watchlist as watched - this will handle TV shows properly
+        await addToWatchlist(item, type, true);
       } catch {
         setOptimisticState(null);
         setOptimisticWatched(null);

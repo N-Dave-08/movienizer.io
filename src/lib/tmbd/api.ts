@@ -1,5 +1,12 @@
 import { tmdbFetch } from "./client";
-import type { Movie, TMDBResponse, TVShow } from "./types";
+import type {
+  Movie,
+  TMDBResponse,
+  TVEpisodeDetails,
+  TVSeasonDetails,
+  TVShow,
+  TVShowDetails,
+} from "./types";
 
 export async function getTrendingMovies(
   timeWindow: "day" | "week" = "week",
@@ -35,4 +42,28 @@ export async function getMovieDetails(movieId: number): Promise<Movie> {
 
 export async function getTVShowDetails(tvId: number): Promise<TVShow> {
   return tmdbFetch(`/tv/${tvId}`);
+}
+
+// New TV show episode tracking API functions
+export async function getTVShowWithSeasons(
+  tvId: number,
+): Promise<TVShowDetails> {
+  return tmdbFetch(`/tv/${tvId}`);
+}
+
+export async function getTVSeason(
+  tvId: number,
+  seasonNumber: number,
+): Promise<TVSeasonDetails> {
+  return tmdbFetch(`/tv/${tvId}/season/${seasonNumber}`);
+}
+
+export async function getTVEpisode(
+  tvId: number,
+  seasonNumber: number,
+  episodeNumber: number,
+): Promise<TVEpisodeDetails> {
+  return tmdbFetch(
+    `/tv/${tvId}/season/${seasonNumber}/episode/${episodeNumber}`,
+  );
 }

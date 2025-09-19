@@ -1,17 +1,19 @@
 "use client";
 
-import { Eye, EyeOff, Trash2 } from "lucide-react";
+import { Eye, EyeOff, List, Trash2 } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
 import { useWatchlistStore } from "@/lib/stores/watchlist-store";
 import { getImageUrl } from "@/lib/tmbd/tmdb";
-import type { WatchlistItem } from "@/lib/types/database";
+import type { EpisodeProgress, WatchlistItem } from "@/lib/types/database";
+import { ProgressIndicator } from "./progress-indicator";
 
 interface WatchlistCardProps {
   item: WatchlistItem;
+  onEpisodeView?: (item: WatchlistItem) => void;
 }
 
-export function WatchlistCard({ item }: WatchlistCardProps) {
+export function WatchlistCard({ item, onEpisodeView }: WatchlistCardProps) {
   const { removeFromWatchlist, updateWatchlistItem } = useWatchlistStore();
   const [isLoading, setIsLoading] = useState(false);
   const [optimisticWatched, setOptimisticWatched] = useState<boolean | null>(
@@ -19,10 +21,28 @@ export function WatchlistCard({ item }: WatchlistCardProps) {
   );
 
   const posterUrl = getImageUrl(item.poster_path, "w300");
+  const isTV = item.media_type === "tv";
 
   // Use optimistic state if available, otherwise use actual state
   const displayWatched =
     optimisticWatched !== null ? optimisticWatched : item.watched;
+
+  // Calculate progress for TV shows
+  const progress: EpisodeProgress | null =
+    isTV && item.total_episodes
+      ? {
+          totalEpisodes: item.total_episodes,
+          watchedEpisodes: item.watched_episodes || 0,
+          currentSeason: item.current_season || 1,
+          currentEpisode: item.current_episode || 1,
+          progressPercentage:
+            item.total_episodes > 0
+              ? Math.round(
+                  ((item.watched_episodes || 0) / item.total_episodes) * 100,
+                )
+              : 0,
+        }
+      : null;
 
   const handleToggleWatched = async () => {
     if (isLoading) return; // Prevent double clicks
@@ -46,6 +66,12 @@ export function WatchlistCard({ item }: WatchlistCardProps) {
 
   const handleRemove = async () => {
     await removeFromWatchlist(item.tmdb_id, item.media_type);
+  };
+
+  const handleEpisodeView = () => {
+    if (onEpisodeView) {
+      onEpisodeView(item);
+    }
   };
 
   return (
@@ -75,25 +101,49 @@ export function WatchlistCard({ item }: WatchlistCardProps) {
         </div>
       )}
 
+      {/* Progress overlay for TV shows */}
+      {isTV && progress && !displayWatched && progress.totalEpisodes > 0 && (
+        <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/80 via-black/40 to-transparent">
+          <ProgressIndicator progress={progress} compact className="mb-1" />
+          <div className="flex items-center justify-between text-xs text-white/80">
+            <span>
+              S{progress.currentSeason}E{progress.currentEpisode}
+            </span>
+            <span>{Math.round(progress.progressPercentage)}%</span>
+          </div>
+        </div>
+      )}
+
       {/* Action buttons */}
       <div className="absolute top-2 right-2 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-        <button
-          type="button"
-          onClick={handleToggleWatched}
-          disabled={isLoading}
-          className={`p-2 rounded-full transition-colors backdrop-blur-sm ${
-            displayWatched
-              ? "bg-success/80 hover:bg-success"
-              : "bg-black/20 hover:bg-black/40"
-          } ${isLoading ? "opacity-50 cursor-not-allowed" : ""}`}
-          title={displayWatched ? "Mark as unwatched" : "Mark as watched"}
-        >
-          {displayWatched ? (
-            <EyeOff className="w-5 h-5 text-white" />
-          ) : (
-            <Eye className="w-5 h-5 text-white" />
-          )}
-        </button>
+        {isTV ? (
+          <button
+            type="button"
+            onClick={handleEpisodeView}
+            className="p-2 rounded-full bg-black/20 hover:bg-primary/80 transition-colors backdrop-blur-sm"
+            title="View episodes"
+          >
+            <List className="w-5 h-5 text-white" />
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={handleToggleWatched}
+            disabled={isLoading}
+            className={`p-2 rounded-full transition-colors backdrop-blur-sm ${
+              displayWatched
+                ? "bg-success/80 hover:bg-success"
+                : "bg-black/20 hover:bg-black/40"
+            } ${isLoading ? "opacity-50 cursor-not-allowed" : ""}`}
+            title={displayWatched ? "Mark as unwatched" : "Mark as watched"}
+          >
+            {displayWatched ? (
+              <EyeOff className="w-5 h-5 text-white" />
+            ) : (
+              <Eye className="w-5 h-5 text-white" />
+            )}
+          </button>
+        )}
 
         <button
           type="button"
