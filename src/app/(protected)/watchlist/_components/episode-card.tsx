@@ -1,6 +1,5 @@
 import { Eye, EyeOff, Star } from "lucide-react";
 import Image from "next/image";
-import { useEffect, useState } from "react";
 import { toggleEpisodeWatched } from "@/lib/episodes/simple-episode-service";
 import { getImageUrl } from "@/lib/tmbd/tmdb";
 import type { SimpleEpisode } from "@/lib/types/database";
@@ -20,26 +19,17 @@ export function EpisodeCard({
   tvId,
   onEpisodeToggle,
 }: EpisodeCardProps) {
-  const [optimisticWatched, setOptimisticWatched] = useState<boolean | null>(
-    null,
-  );
-
-  // Reset optimistic state when episode watched property changes (parent updated it)
-  useEffect(() => {
-    if (optimisticWatched !== null && episode.watched === optimisticWatched) {
-      setOptimisticWatched(null);
-    }
-  }, [episode.watched, optimisticWatched]);
-
-  // Use optimistic state if available, otherwise use actual state
-  const displayWatched =
-    optimisticWatched !== null ? optimisticWatched : episode.watched;
-
   const handleToggleWatched = async () => {
-    const newWatchedState = !displayWatched;
+    const newWatchedState = !episode.watched;
 
-    // Immediately update UI (optimistic)
-    setOptimisticWatched(newWatchedState);
+    // Optimistic update is handled by parent
+    if (onEpisodeToggle) {
+      onEpisodeToggle(
+        episode.season_number,
+        episode.episode_number,
+        newWatchedState,
+      );
+    }
 
     try {
       await toggleEpisodeWatched(
@@ -48,30 +38,23 @@ export function EpisodeCard({
         episode.episode_number,
         newWatchedState,
       );
-
-      // Keep optimistic state - don't reset until episode prop updates
-      // setOptimisticWatched(null); // Removed to prevent flicker back to old state
-
-      // Notify parent of the change
+    } catch (error) {
+      console.error("Failed to update episode:", error);
+      // Revert in parent
       if (onEpisodeToggle) {
         onEpisodeToggle(
           episode.season_number,
           episode.episode_number,
-          newWatchedState,
+          episode.watched,
         );
       }
-    } catch (error) {
-      console.error("Failed to update episode:", error);
-
-      // Revert optimistic state on error
-      setOptimisticWatched(!newWatchedState);
     }
   };
 
   return (
     <div
       className={`card bg-base-100 shadow-sm border-2 transition-all duration-200 ${
-        displayWatched
+        episode.watched
           ? "border-success bg-success/5"
           : "border-base-300 hover:border-primary/30"
       }`}
@@ -93,10 +76,10 @@ export function EpisodeCard({
           {/* Watch status indicator */}
           <div
             className={`badge badge-sm transition-all duration-200 ${
-              displayWatched ? "badge-success" : "badge-ghost"
+              episode.watched ? "badge-success" : "badge-ghost"
             }`}
           >
-            {displayWatched ? "Watched" : "Unwatched"}
+            {episode.watched ? "Watched" : "Unwatched"}
           </div>
         </div>
 
@@ -142,17 +125,17 @@ export function EpisodeCard({
             type="button"
             onClick={handleToggleWatched}
             className={`btn btn-xs transition-all duration-200 ${
-              displayWatched
+              episode.watched
                 ? "btn-success hover:btn-outline"
                 : "btn-outline btn-primary"
             }`}
           >
-            {displayWatched ? (
+            {episode.watched ? (
               <EyeOff className="w-3 h-3" />
             ) : (
               <Eye className="w-3 h-3" />
             )}
-            {displayWatched ? "Unwatch" : "Mark Watched"}
+            {episode.watched ? "Unwatch" : "Mark Watched"}
           </button>
         </div>
       </div>

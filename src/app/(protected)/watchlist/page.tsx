@@ -49,9 +49,38 @@ export default function Watchlist() {
 
   if (authLoading) {
     return (
-      <div className="flex justify-center items-center min-h-[400px]">
-        <span className="loading loading-spinner loading-lg"></span>
-      </div>
+      <>
+        <div className="mb-8">
+          <div className="skeleton h-8 w-48 mb-2"></div>
+          <div className="skeleton h-4 w-96"></div>
+        </div>
+
+        {/* Skeleton Filters */}
+        <div className="mb-6 space-y-4">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between bg-base-200 p-4 rounded-lg">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
+              <div className="skeleton h-4 w-12"></div>
+              <div className="flex gap-2">
+                <div className="skeleton h-8 w-20"></div>
+                <div className="skeleton h-8 w-20"></div>
+                <div className="skeleton h-8 w-16"></div>
+              </div>
+            </div>
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
+              <div className="skeleton h-4 w-8"></div>
+              <div className="flex gap-2">
+                <div className="skeleton h-8 w-20"></div>
+                <div className="skeleton h-8 w-16"></div>
+                <div className="skeleton h-8 w-14"></div>
+              </div>
+            </div>
+          </div>
+          <div className="skeleton h-12 w-full rounded-lg"></div>
+        </div>
+
+        {/* Skeleton Grid */}
+        <MediaSkeletonGrid count={4} />
+      </>
     );
   }
 
@@ -109,7 +138,7 @@ export default function Watchlist() {
         </div>
       )}
 
-      {items.length === 0 ? (
+      {items.length === 0 && !loading ? (
         <div className="flex flex-col items-center justify-center min-h-[400px] text-center border-2 border-dashed border-base-300 rounded-lg p-8">
           <div className="max-w-md">
             <div className="mb-6">
@@ -207,7 +236,9 @@ export default function Watchlist() {
           </div>
 
           {/* Results */}
-          {filteredItems.length === 0 ? (
+          {loading && !initialized ? (
+            <MediaSkeletonGrid count={4} />
+          ) : filteredItems.length === 0 ? (
             <div className="text-center py-12">
               <Filter className="w-12 h-12 mx-auto text-base-content/50 mb-4" />
               <h3 className="text-lg font-semibold mb-2">
@@ -217,8 +248,6 @@ export default function Watchlist() {
                 Try adjusting your search or filter criteria
               </p>
             </div>
-          ) : loading && !initialized ? (
-            <MediaSkeletonGrid count={4} />
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {filteredItems.map((item) => (

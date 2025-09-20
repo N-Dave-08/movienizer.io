@@ -11,13 +11,7 @@ export function ProgressIndicator({
   compact = false,
   className = "",
 }: ProgressIndicatorProps) {
-  const {
-    watchedEpisodes,
-    totalEpisodes,
-    progressPercentage,
-    currentSeason,
-    currentEpisode,
-  } = progress;
+  const { watchedEpisodes, totalEpisodes, progressPercentage } = progress;
 
   if (compact) {
     return (
@@ -55,12 +49,6 @@ export function ProgressIndicator({
           {progressPercentage}%
         </span>
       </div>
-
-      {progressPercentage < 100 && (
-        <div className="text-xs text-base-content/60">
-          Next: S{currentSeason}E{currentEpisode}
-        </div>
-      )}
 
       {progressPercentage === 100 && (
         <div className="text-xs text-success font-medium">✓ Completed</div>

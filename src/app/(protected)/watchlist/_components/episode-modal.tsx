@@ -1,7 +1,7 @@
 "use client";
 
-import { CheckCheck, RotateCcw, X } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { CheckCheck, Grid3X3, List, RotateCcw, X } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   getEpisodesForSeason,
   getSeasonsForShow,
@@ -17,6 +17,73 @@ import type {
 } from "@/lib/types/database";
 import { EpisodeCard } from "./episode-card";
 import { ProgressIndicator } from "./progress-indicator";
+
+// Compact Episode Card Component
+interface CompactEpisodeCardProps {
+  episode: SimpleEpisode;
+  tvId: number;
+  onEpisodeToggle?: (
+    seasonNumber: number,
+    episodeNumber: number,
+    watched: boolean,
+  ) => void;
+}
+
+function CompactEpisodeCard({
+  episode,
+  tvId,
+  onEpisodeToggle,
+}: CompactEpisodeCardProps) {
+  const handleToggleWatched = async () => {
+    const newWatchedState = !episode.watched;
+
+    // Optimistic update is handled by parent
+    if (onEpisodeToggle) {
+      onEpisodeToggle(
+        episode.season_number,
+        episode.episode_number,
+        newWatchedState,
+      );
+    }
+
+    try {
+      const { toggleEpisodeWatched } = await import(
+        "@/lib/episodes/simple-episode-service"
+      );
+      await toggleEpisodeWatched(
+        tvId,
+        episode.season_number,
+        episode.episode_number,
+        newWatchedState,
+      );
+    } catch (error) {
+      console.error("Failed to update episode:", error);
+      // Revert in parent
+      if (onEpisodeToggle) {
+        onEpisodeToggle(
+          episode.season_number,
+          episode.episode_number,
+          episode.watched,
+        );
+      }
+    }
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={handleToggleWatched}
+      className={`aspect-square rounded-lg border-2 font-medium text-sm transition-all duration-200 hover:scale-105 active:scale-95 ${
+        episode.watched
+          ? "bg-success text-success-content border-success shadow-md"
+          : "bg-base-200 text-base-content border-base-300 hover:border-primary/50 hover:bg-base-300"
+      }`}
+      title={`Episode ${episode.episode_number}: ${episode.name}${episode.air_date ? ` (${new Date(episode.air_date).toLocaleDateString()})` : ""}`}
+    >
+      {episode.episode_number}
+    </button>
+  );
+}
 
 interface EpisodeModalProps {
   watchlistItem: WatchlistItem | null;
@@ -34,6 +101,8 @@ export function EpisodeModal({
   const [episodes, setEpisodes] = useState<SimpleEpisode[]>([]);
   const [progress, setProgress] = useState<EpisodeProgress | null>(null);
   const [loading, setLoading] = useState(false);
+  const [viewMode, setViewMode] = useState<"detailed" | "compact">("detailed");
+  const requestIdRef = useRef(0);
 
   // Function to get fresh watchlist data from database
   const loadFreshWatchlistData = useCallback(async () => {
@@ -159,6 +228,9 @@ export function EpisodeModal({
     async (watched: boolean) => {
       if (!watchlistItem) return;
 
+      // Increment request version
+      const currentRequest = ++requestIdRef.current;
+
       // Optimistically update all episodes in the current season
       const optimisticEpisodes = episodes.map((episode) => ({
         ...episode,
@@ -179,17 +251,21 @@ export function EpisodeModal({
           );
         }
 
-        // Reload fresh data after successful update
-        handleEpisodeUpdate();
+        // Apply server response only if still latest request
+        if (currentRequest === requestIdRef.current) {
+          handleEpisodeUpdate();
+        }
       } catch (error) {
         console.error("Failed to update episodes:", error);
 
-        // Revert optimistic update on error
-        const revertedEpisodes = episodes.map((episode) => ({
-          ...episode,
-          watched: !watched,
-        }));
-        setEpisodes(revertedEpisodes);
+        // Revert optimistic update only if still latest request
+        if (currentRequest === requestIdRef.current) {
+          const revertedEpisodes = episodes.map((episode) => ({
+            ...episode,
+            watched: !watched,
+          }));
+          setEpisodes(revertedEpisodes);
+        }
       }
     },
     [watchlistItem, selectedSeason, seasons, episodes, handleEpisodeUpdate],
@@ -234,16 +310,20 @@ export function EpisodeModal({
         ) : (
           <>
             {/* Season Selector */}
-            <div className="tabs tabs-bordered mb-4 overflow-x-auto">
+            <div className="flex flex-wrap gap-2 mb-4 overflow-x-auto pb-2">
               {seasons.map((season) => (
                 <button
                   key={season.season_number}
                   type="button"
-                  className={`tab ${selectedSeason === season.season_number ? "tab-active" : ""}`}
+                  className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 whitespace-nowrap ${
+                    selectedSeason === season.season_number
+                      ? "bg-primary text-primary-content shadow-md"
+                      : "bg-base-200 text-base-content hover:bg-base-300 hover:shadow-sm"
+                  }`}
                   onClick={() => setSelectedSeason(season.season_number)}
                 >
                   Season {season.season_number}
-                  <span className="ml-1 text-xs opacity-60">
+                  <span className="ml-1 text-xs opacity-70">
                     ({season.episode_count})
                   </span>
                 </button>
@@ -252,45 +332,82 @@ export function EpisodeModal({
 
             {/* Season Actions */}
             {episodes.length > 0 && (
-              <div className="flex items-center gap-2 mb-4">
-                <button
-                  type="button"
-                  className="btn btn-sm btn-outline"
-                  onClick={() => handleMarkAllWatched(true)}
-                  disabled={unwatchedCount === 0}
-                >
-                  <CheckCheck className="w-4 h-4" />
-                  Mark All Watched ({unwatchedCount})
-                </button>
+              <div className="flex items-center justify-between gap-2 mb-4 ">
+                {/* View Toggle */}
 
-                <button
-                  type="button"
-                  className="btn btn-sm btn-outline"
-                  onClick={() => handleMarkAllWatched(false)}
-                  disabled={watchedCount === 0}
-                >
-                  <RotateCcw className="w-4 h-4" />
-                  Mark All Unwatched ({watchedCount})
-                </button>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-base-content/70">View:</span>
+                  <div className="join space-x-2">
+                    <button
+                      type="button"
+                      className={`btn btn-sm join-item ${viewMode === "compact" ? "btn-primary" : "btn-outline"}`}
+                      onClick={() => setViewMode("compact")}
+                    >
+                      <Grid3X3 className="w-4 h-4" />
+                      Numbers
+                    </button>
+                    <button
+                      type="button"
+                      className={`btn btn-sm join-item ${viewMode === "detailed" ? "btn-primary" : "btn-outline"}`}
+                      onClick={() => setViewMode("detailed")}
+                    >
+                      <List className="w-4 h-4" />
+                      Detailed
+                    </button>
+                  </div>
+                </div>
 
-                <div className="ml-auto text-sm text-base-content/70 transition-all duration-200">
-                  {watchedCount}/{episodes.length} episodes watched
+                <div className=" flex items-center gap-2">
+                  <button
+                    type="button"
+                    className="btn btn-sm btn-outline"
+                    onClick={() => handleMarkAllWatched(true)}
+                    disabled={unwatchedCount === 0}
+                  >
+                    <CheckCheck className="w-4 h-4" />({unwatchedCount})
+                  </button>
+
+                  <button
+                    type="button"
+                    className="btn btn-sm btn-outline"
+                    onClick={() => handleMarkAllWatched(false)}
+                    disabled={watchedCount === 0}
+                  >
+                    <RotateCcw className="w-4 h-4" />({watchedCount})
+                  </button>
+
+                  <div className="ml-auto text-sm text-base-content/70 transition-all duration-200">
+                    {watchedCount}/{episodes.length} episodes watched
+                  </div>
                 </div>
               </div>
             )}
 
-            {/* Episodes Grid */}
+            {/* Episodes Display */}
             {episodes.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-96 overflow-y-auto animate-in fade-in duration-300">
-                {episodes.map((episode) => (
-                  <EpisodeCard
-                    key={`S${episode.season_number}E${episode.episode_number}`}
-                    episode={episode}
-                    tvId={watchlistItem.tmdb_id}
-                    onEpisodeToggle={handleEpisodeToggle}
-                  />
-                ))}
-              </div>
+              viewMode === "detailed" ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-96 overflow-y-auto animate-in fade-in duration-300">
+                  {episodes.map((episode) => (
+                    <EpisodeCard
+                      key={`S${episode.season_number}E${episode.episode_number}`}
+                      episode={episode}
+                      tvId={watchlistItem.tmdb_id}
+                      onEpisodeToggle={handleEpisodeToggle}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 lg:grid-cols-12 gap-2 max-h-96 overflow-y-auto animate-in fade-in duration-300 p-2">
+                  {episodes.map((episode) => (
+                    <CompactEpisodeCard
+                      key={`S${episode.season_number}E${episode.episode_number}`}
+                      episode={episode}
+                      tvId={watchlistItem.tmdb_id}
+                      onEpisodeToggle={handleEpisodeToggle}
+                    />
+                  ))}
+                </div>
+              )
             ) : (
               <div className="text-center py-8 text-base-content/60 animate-in fade-in duration-300">
                 <p>No episodes found for Season {selectedSeason}</p>

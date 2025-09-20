@@ -116,7 +116,7 @@ export function WatchlistCard({ item, onEpisodeView }: WatchlistCardProps) {
 
       {/* Action buttons */}
       <div className="absolute top-2 right-2 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-        {isTV ? (
+        {isTV && (
           <button
             type="button"
             onClick={handleEpisodeView}
@@ -125,25 +125,25 @@ export function WatchlistCard({ item, onEpisodeView }: WatchlistCardProps) {
           >
             <List className="w-5 h-5 text-white" />
           </button>
-        ) : (
-          <button
-            type="button"
-            onClick={handleToggleWatched}
-            disabled={isLoading}
-            className={`p-2 rounded-full transition-colors backdrop-blur-sm ${
-              displayWatched
-                ? "bg-success/80 hover:bg-success"
-                : "bg-black/20 hover:bg-black/40"
-            } ${isLoading ? "opacity-50 cursor-not-allowed" : ""}`}
-            title={displayWatched ? "Mark as unwatched" : "Mark as watched"}
-          >
-            {displayWatched ? (
-              <EyeOff className="w-5 h-5 text-white" />
-            ) : (
-              <Eye className="w-5 h-5 text-white" />
-            )}
-          </button>
         )}
+
+        <button
+          type="button"
+          onClick={handleToggleWatched}
+          disabled={isLoading}
+          className={`p-2 rounded-full transition-colors backdrop-blur-sm ${
+            displayWatched
+              ? "bg-success/80 hover:bg-success"
+              : "bg-black/20 hover:bg-black/40"
+          } ${isLoading ? "opacity-50 cursor-not-allowed" : ""}`}
+          title={displayWatched ? "Mark as unwatched" : "Mark as watched"}
+        >
+          {displayWatched ? (
+            <EyeOff className="w-5 h-5 text-white" />
+          ) : (
+            <Eye className="w-5 h-5 text-white" />
+          )}
+        </button>
 
         <button
           type="button"
