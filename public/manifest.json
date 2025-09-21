@@ -1,6 +1,6 @@
 {
-  "name": "MovieNizer - Entertainment Organizer",
-  "short_name": "MovieNizer",
+  "name": "Moviefy - Entertainment Organizer",
+  "short_name": "Moviefy",
   "description": "Organize your movies, series, and anime. Track progress across multiple platforms and never lose your place again.",
   "start_url": "/",
   "display": "standalone",

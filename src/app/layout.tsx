@@ -12,8 +12,8 @@ const inter = Inter({
 export const metadata: Metadata = {
   metadataBase: new URL("https://movienizer-io.vercel.app"),
   title: {
-    default: "MovieNizer - Your Ultimate Entertainment Organizer",
-    template: "%s | MovieNizer",
+    default: "Moviefy - Your Ultimate Entertainment Organizer",
+    template: "%s | Moviefy",
   },
   description:
     "Organize your movies, series, and anime. Track progress across multiple platforms and never lose your place again. Discover new content and manage your watchlist effortlessly.",
@@ -28,9 +28,9 @@ export const metadata: Metadata = {
     "movie collection",
     "tv show organizer",
   ],
-  authors: [{ name: "MovieNizer Team" }],
-  creator: "MovieNizer",
-  publisher: "MovieNizer",
+  authors: [{ name: "Moviefy Team" }],
+  creator: "Moviefy",
+  publisher: "Moviefy",
   robots: {
     index: true,
     follow: true,
@@ -46,22 +46,22 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     url: "https://movienizer-io.vercel.app",
-    title: "MovieNizer - Your Ultimate Entertainment Organizer",
+    title: "Moviefy - Your Ultimate Entertainment Organizer",
     description:
       "Organize your movies, series, and anime. Track progress across multiple platforms and never lose your place again.",
-    siteName: "MovieNizer",
+    siteName: "Moviefy",
     images: [
       {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "MovieNizer - Entertainment Organizer",
+        alt: "Moviefy - Entertainment Organizer",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "MovieNizer - Your Ultimate Entertainment Organizer",
+    title: "Moviefy - Your Ultimate Entertainment Organizer",
     description:
       "Organize your movies, series, and anime. Track progress across multiple platforms.",
     images: ["/og-image.png"],

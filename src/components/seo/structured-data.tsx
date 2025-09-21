@@ -7,7 +7,7 @@ export function StructuredData({ type }: StructuredDataProps) {
     "@type": "WebSite",
     "@id": "https://movienizer-io.vercel.app/#website",
     url: "https://movienizer-io.vercel.app",
-    name: "MovieNizer",
+    name: "Moviefy",
     description:
       "Organize your movies, series, and anime. Track progress across multiple platforms and never lose your place again.",
     inLanguage: "en-US",
@@ -16,7 +16,7 @@ export function StructuredData({ type }: StructuredDataProps) {
   const organizationData = {
     "@type": "Organization",
     "@id": "https://movienizer-io.vercel.app/#organization",
-    name: "MovieNizer",
+    name: "Moviefy",
     url: "https://movienizer-io.vercel.app",
     description:
       "The ultimate entertainment organizer for movies, TV series, and anime",

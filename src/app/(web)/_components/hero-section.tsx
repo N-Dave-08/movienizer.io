@@ -24,7 +24,7 @@ export default function HeroSection() {
       <div className="hero-content text-center">
         <div className="max-w-4xl">
           <h1 className="text-6xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-            MovieNizer
+            Moviefy
           </h1>
 
           {loading ? (
@@ -53,8 +53,8 @@ export default function HeroSection() {
             <>
               <p className="text-xl py-6 text-base-content/80 max-w-2xl mx-auto">
                 Your ultimate entertainment companion. Organize your movies,
-                series, and anime. Track your progress across multiple platforms
-                and never lose your place again.
+                series, and anime with Moviefy. Track your progress across
+                multiple platforms and never lose your place again.
               </p>
               <div className="flex gap-4 justify-center flex-wrap">
                 <Link href="/signup" className="btn btn-primary btn-lg">
