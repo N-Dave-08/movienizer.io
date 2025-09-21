@@ -1,4 +1,24 @@
+import type { Metadata } from "next";
 import dynamic from "next/dynamic";
+import { StructuredData } from "@/components/seo/structured-data";
+
+export const metadata: Metadata = {
+  title: "MovieNizer - Organize Your Entertainment Collection",
+  description:
+    "The ultimate movie, TV series, and anime organizer. Track your progress across platforms, discover new content, and never lose your place again. Start organizing your entertainment today!",
+  openGraph: {
+    title: "MovieNizer - Organize Your Entertainment Collection",
+    description:
+      "The ultimate movie, TV series, and anime organizer. Track your progress across platforms, discover new content, and never lose your place again.",
+    type: "website",
+    url: "https://movienizer-io.vercel.app",
+  },
+  twitter: {
+    title: "MovieNizer - Organize Your Entertainment Collection",
+    description:
+      "The ultimate movie, TV series, and anime organizer. Track your progress across platforms, discover new content, and never lose your place again.",
+  },
+};
 
 // Dynamic imports for code splitting
 const HeroSection = dynamic(() => import("./_components/hero-section"), {
@@ -42,6 +62,8 @@ const Footer = dynamic(() => import("./_components/footer"), {
 export default function HomePage() {
   return (
     <>
+      <StructuredData type="website" />
+      <StructuredData type="organization" />
       <HeroSection />
       <FeaturesSection />
       <CombinedCTAHowSection />

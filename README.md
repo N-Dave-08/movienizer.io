@@ -14,7 +14,7 @@ pnpm dev
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result in development, or visit [https://movienizer-io.vercel.app](https://movienizer-io.vercel.app) to see the live app.
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 

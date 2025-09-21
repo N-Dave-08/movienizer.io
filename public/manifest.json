@@ -1,0 +1,32 @@
+{
+  "name": "MovieNizer - Entertainment Organizer",
+  "short_name": "MovieNizer",
+  "description": "Organize your movies, series, and anime. Track progress across multiple platforms and never lose your place again.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1d232a",
+  "theme_color": "#1d232a",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "any",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "/icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "maskable"
+    }
+  ],
+  "categories": ["entertainment", "lifestyle", "productivity"],
+  "lang": "en",
+  "dir": "ltr"
+}
