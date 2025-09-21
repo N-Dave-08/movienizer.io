@@ -101,7 +101,7 @@ export function EpisodeModal({
   const [episodes, setEpisodes] = useState<SimpleEpisode[]>([]);
   const [progress, setProgress] = useState<EpisodeProgress | null>(null);
   const [loading, setLoading] = useState(false);
-  const [viewMode, setViewMode] = useState<"detailed" | "compact">("detailed");
+  const [viewMode, setViewMode] = useState<"detailed" | "compact">("compact");
   const requestIdRef = useRef(0);
 
   // Function to get fresh watchlist data from database
