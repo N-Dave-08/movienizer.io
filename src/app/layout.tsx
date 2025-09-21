@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { AppProviders } from "@/components/providers/app-providers";
 import Header from "@/components/ui/header";
+import { MobileModal } from "@/components/ui/mobile-modal";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -10,7 +11,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://movienizer-io.vercel.app"),
+  metadataBase: new URL("https://moviefy-io.vercel.app"),
   title: {
     default: "Moviefy - Your Ultimate Entertainment Organizer",
     template: "%s | Moviefy",
@@ -45,7 +46,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://movienizer-io.vercel.app",
+    url: "https://moviefy-io.vercel.app",
     title: "Moviefy - Your Ultimate Entertainment Organizer",
     description:
       "Organize your movies, series, and anime. Track progress across multiple platforms and never lose your place again.",
@@ -70,7 +71,7 @@ export const metadata: Metadata = {
     google: "v1lmb2ARdnesb7MkuC-c5xCCVp1OW0tkaglblkgWzmI",
   },
   alternates: {
-    canonical: "https://movienizer-io.vercel.app",
+    canonical: "https://moviefy-io.vercel.app",
   },
 };
 
@@ -92,6 +93,7 @@ export default function RootLayout({
         <AppProviders>
           <Header />
           {children}
+          <MobileModal />
         </AppProviders>
       </body>
     </html>

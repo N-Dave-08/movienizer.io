@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     description:
       "The ultimate movie, TV series, and anime organizer. Track your progress across platforms, discover new content, and never lose your place again.",
     type: "website",
-    url: "https://movienizer-io.vercel.app",
+    url: "https://moviefy-io.vercel.app",
   },
   twitter: {
     title: "Moviefy - Organize Your Entertainment Collection",

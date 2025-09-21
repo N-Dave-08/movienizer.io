@@ -43,7 +43,7 @@ export default function Header() {
       <nav className="py-3 px-6 w-7xl rounded-box shadow-lg bg-base-100/70 backdrop-blur-2xl">
         <div className="flex items-center justify-between">
           <button type="button" className="btn btn-ghost btn-lg font-bold">
-            <Link href="/"> MovieNizer</Link>
+            <Link href="/"> Moviefy</Link>
           </button>
 
           <div className="flex items-center gap-2">

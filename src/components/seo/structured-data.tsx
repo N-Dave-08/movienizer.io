@@ -5,8 +5,8 @@ interface StructuredDataProps {
 export function StructuredData({ type }: StructuredDataProps) {
   const websiteData = {
     "@type": "WebSite",
-    "@id": "https://movienizer-io.vercel.app/#website",
-    url: "https://movienizer-io.vercel.app",
+    "@id": "https://moviefy-io.vercel.app/#website",
+    url: "https://moviefy-io.vercel.app",
     name: "Moviefy",
     description:
       "Organize your movies, series, and anime. Track progress across multiple platforms and never lose your place again.",
@@ -15,9 +15,9 @@ export function StructuredData({ type }: StructuredDataProps) {
 
   const organizationData = {
     "@type": "Organization",
-    "@id": "https://movienizer-io.vercel.app/#organization",
+    "@id": "https://moviefy-io.vercel.app/#organization",
     name: "Moviefy",
-    url: "https://movienizer-io.vercel.app",
+    url: "https://moviefy-io.vercel.app",
     description:
       "The ultimate entertainment organizer for movies, TV series, and anime",
     foundingDate: "2024",

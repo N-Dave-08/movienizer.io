@@ -1,4 +1,4 @@
-# SEO Setup Guide for MovieNizer
+# SEO Setup Guide for Moviefy
 
 ## ✅ Completed SEO Enhancements
 
@@ -35,14 +35,14 @@ You need to create these image files in the `/public` directory:
 └── icon-512.png          # 512x512px - PWA icon
 ```
 
-**Recommended tool**: Use Canva, Figma, or similar to create these with your MovieNizer branding.
+**Recommended tool**: Use Canva, Figma, or similar to create these with your Moviefy branding.
 
 ### 2. **Google Search Console Setup**
 1. Go to [Google Search Console](https://search.google.com/search-console)
-2. Add your property: `https://movienizer-io.vercel.app`
+2. Add your property: `https://moviefy-io.vercel.app`
 3. Verify ownership using the HTML tag method
 4. Update the verification code in `src/app/layout.tsx` (line 48)
-5. Submit your sitemap: `https://movienizer-io.vercel.app/sitemap.xml`
+5. Submit your sitemap: `https://moviefy-io.vercel.app/sitemap.xml`
 
 ### 3. **Content Optimization**
 - ✅ Landing page has good SEO content structure
@@ -139,4 +139,4 @@ If targeting specific regions:
 - 🔄 Regular content updates
 - 🔄 Social media integration
 
-Your MovieNizer app is now well-optimized for search engines! The subdomain `movienizer-io.vercel.app` won't hurt your SEO - many successful apps use similar domains. 
+Your Moviefy app is now well-optimized for search engines! The subdomain `moviefy-io.vercel.app` won't hurt your SEO - many successful apps use similar domains. 
