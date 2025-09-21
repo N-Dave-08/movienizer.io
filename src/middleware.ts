@@ -29,8 +29,12 @@ export async function middleware(request: NextRequest) {
 
   const pathname = request.nextUrl.pathname;
 
-  // Skip auth check for auth callback route
-  if (pathname === "/auth/callback") {
+  // Skip auth check for auth callback route and SEO routes
+  if (
+    pathname === "/auth/callback" ||
+    pathname === "/sitemap.xml" ||
+    pathname === "/robots.txt"
+  ) {
     return response;
   }
 
@@ -64,6 +68,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };
