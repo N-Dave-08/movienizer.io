@@ -1,5 +1,7 @@
 export function MediaSkeleton() {
-  return <figure className="w-52 h-72 bg-neutral rounded-sm animate-pulse" />;
+  return (
+    <figure className="w-full aspect-[2/3] bg-neutral rounded-sm animate-pulse" />
+  );
 }
 
 export function MediaSkeletonGrid({ count = 4 }: { count?: number }) {

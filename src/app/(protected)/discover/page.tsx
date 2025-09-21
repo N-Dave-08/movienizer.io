@@ -12,7 +12,9 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { MediaCard } from "@/app/(protected)/discover/_components/media-card";
+import { MediaCardList } from "@/app/(protected)/discover/_components/media-card-list";
 import { MediaSkeletonGrid } from "@/app/(protected)/discover/_components/media-skeleton";
+import { Filters } from "@/components/ui/filters";
 import {
   getTrendingMovies,
   getTrendingTVShows,
@@ -44,6 +46,7 @@ export default function Discover() {
   const [timeWindow, setTimeWindow] = useState<TimeWindow>("week");
   const [contentType, setContentType] = useState<ContentType>("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
   // Determine if we're in search mode
@@ -227,11 +230,19 @@ export default function Discover() {
                 <Film className="w-6 h-6" />
                 {isSearchMode ? "Movies" : "Trending Movies"}
               </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {movies.map((movie) => (
-                  <MediaCard key={movie.id} item={movie} type="movie" />
-                ))}
-              </div>
+              {viewMode === "grid" ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                  {movies.map((movie) => (
+                    <MediaCard key={movie.id} item={movie} type="movie" />
+                  ))}
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {movies.map((movie) => (
+                    <MediaCardList key={movie.id} item={movie} type="movie" />
+                  ))}
+                </div>
+              )}
             </section>
           )}
 
@@ -242,11 +253,19 @@ export default function Discover() {
                 <Tv className="w-6 h-6" />
                 {isSearchMode ? "Series" : "Trending Series"}
               </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {tvShows.map((tvShow) => (
-                  <MediaCard key={tvShow.id} item={tvShow} type="tv" />
-                ))}
-              </div>
+              {viewMode === "grid" ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                  {tvShows.map((tvShow) => (
+                    <MediaCard key={tvShow.id} item={tvShow} type="tv" />
+                  ))}
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {tvShows.map((tvShow) => (
+                    <MediaCardList key={tvShow.id} item={tvShow} type="tv" />
+                  ))}
+                </div>
+              )}
             </section>
           )}
       </div>
@@ -257,12 +276,12 @@ export default function Discover() {
     <div className="space-y-8">
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-3xl font-bold flex items-center gap-3">
+        <div className="text-center">
+          <h1 className="text-3xl font-bold flex items-center justify-center gap-3">
             {isSearchMode ? (
-              <Search className="w-8 h-8" />
+              <Search className="w-8 h-8 md:block hidden" />
             ) : (
-              <TrendingUp className="w-8 h-8" />
+              <TrendingUp className="w-8 h-8 md:block hidden" />
             )}
             {isSearchMode ? "Search Results" : "Discover"}
           </h1>
@@ -298,53 +317,44 @@ export default function Discover() {
 
       {/* Filters - Only show when not in search mode */}
       {!isSearchMode && (
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between bg-base-200 p-4 rounded-lg">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
-            <span className="font-medium">Time Period:</span>
-            <div className="join space-x-2">
-              <button
-                type="button"
-                className={`btn join-item btn-sm ${timeWindow === "day" ? "btn-primary" : "btn-outline"}`}
-                onClick={() => setTimeWindow("day")}
-              >
-                Today
-              </button>
-              <button
-                type="button"
-                className={`btn join-item btn-sm ${timeWindow === "week" ? "btn-primary" : "btn-outline"}`}
-                onClick={() => setTimeWindow("week")}
-              >
-                This Week
-              </button>
-            </div>
-          </div>
+        <Filters
+          filterGroups={[
+            {
+              key: "timeWindow",
+              label: "Time Period",
+              value: timeWindow,
+              onChange: (value) => setTimeWindow(value as "day" | "week"),
+              options: [
+                { value: "day", label: "Today" },
+                { value: "week", label: "This Week" },
+              ],
+            },
+            {
+              key: "contentType",
+              label: "Content",
+              value: contentType,
+              onChange: (value) =>
+                setContentType(value as "movies" | "tv" | "all"),
+              options: [
+                { value: "all", label: "All" },
+                { value: "movies", label: "Movies" },
+                { value: "tv", label: "Series" },
+              ],
+            },
+          ]}
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
+        />
+      )}
 
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
-            <span className="font-medium">Content:</span>
-            <div className="join space-x-2">
-              <button
-                type="button"
-                className={`btn join-item btn-sm ${contentType === "all" ? "btn-primary" : "btn-outline"}`}
-                onClick={() => setContentType("all")}
-              >
-                All
-              </button>
-              <button
-                type="button"
-                className={`btn join-item btn-sm ${contentType === "movies" ? "btn-primary" : "btn-outline"}`}
-                onClick={() => setContentType("movies")}
-              >
-                Movies
-              </button>
-              <button
-                type="button"
-                className={`btn join-item btn-sm ${contentType === "tv" ? "btn-primary" : "btn-outline"}`}
-                onClick={() => setContentType("tv")}
-              >
-                Series
-              </button>
-            </div>
-          </div>
+      {/* View Toggle for search mode */}
+      {isSearchMode && (
+        <div className="flex justify-end">
+          <Filters
+            filterGroups={[]}
+            viewMode={viewMode}
+            onViewModeChange={setViewMode}
+          />
         </div>
       )}
 

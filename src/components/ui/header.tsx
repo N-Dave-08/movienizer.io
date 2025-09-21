@@ -39,8 +39,8 @@ export default function Header() {
   };
 
   return (
-    <header className="flex items-center justify-center -mb-18 sticky top-4 z-50">
-      <nav className="py-3 px-6 w-7xl rounded-box shadow-lg bg-base-100/70 backdrop-blur-2xl">
+    <header className="flex items-center justify-center -mb-18 sticky md:top-4 z-50">
+      <nav className="py-3 px-6 w-7xl md:rounded-box shadow-lg bg-base-100/70 backdrop-blur-2xl">
         <div className="flex items-center justify-between">
           <button type="button" className="btn btn-ghost btn-lg font-bold">
             <Link href="/"> Moviefy</Link>

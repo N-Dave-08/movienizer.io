@@ -75,19 +75,18 @@ export function WatchlistCard({ item, onEpisodeView }: WatchlistCardProps) {
   };
 
   return (
-    <figure className="group relative w-52 h-72 bg-base-100 shadow-lg hover:scale-105 hover:shadow-xl transition-all duration-300 rounded-sm">
+    <figure className="group relative w-full aspect-[2/3] bg-base-100 shadow-lg hover:scale-105 hover:shadow-xl transition-all duration-300 rounded-sm">
       {posterUrl ? (
         <Image
           src={posterUrl}
           alt={item.title}
-          width={300}
-          height={320}
-          className="w-52 h-72 object-fill rounded-sm"
+          fill
+          className="object-cover rounded-sm"
           placeholder="blur"
           blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkbHB0eH/xAAVAQEBAAAAAAAAAAAAAAAAAAAAAf/EABQRAQAAAAAAAAAAAAAAAAAAAAD/2gAMAwEAAhEDEQA/AJvHfF2E0Y8nQSa7qdNEPOPYDf8AjWb3MeOw5e7K7cJy7zIlnqy8Yf8ABSr3H1w2WJJl0w2y2nSJz/"
         />
       ) : (
-        <div className="w-52 h-72 bg-base-300 flex items-center justify-center">
+        <div className="w-full h-full bg-base-300 flex items-center justify-center rounded-sm">
           <span className="text-base-content/50">No Image</span>
         </div>
       )}
@@ -101,9 +100,9 @@ export function WatchlistCard({ item, onEpisodeView }: WatchlistCardProps) {
         </div>
       )}
 
-      {/* Progress overlay for TV shows */}
+      {/* Progress overlay for TV shows - only show if not watched and has progress */}
       {isTV && progress && !displayWatched && progress.totalEpisodes > 0 && (
-        <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/80 via-black/40 to-transparent">
+        <div className="absolute bottom-14 md:bottom-0 left-0 right-0 p-2 ">
           <ProgressIndicator progress={progress} compact className="mb-1" />
           <div className="flex items-center justify-between text-xs text-white/80">
             <span>
@@ -114,45 +113,52 @@ export function WatchlistCard({ item, onEpisodeView }: WatchlistCardProps) {
         </div>
       )}
 
-      {/* Action buttons */}
-      <div className="absolute top-2 right-2 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-        {isTV && (
+      {/* Bottom Action Bar - Mobile-friendly */}
+      <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/90 via-black/60 to-transparent opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200">
+        <div className="flex justify-center gap-3 pt-2">
+          {isTV && (
+            <button
+              type="button"
+              onClick={handleEpisodeView}
+              className="p-2 rounded-full bg-white/20 hover:bg-primary/80 active:bg-primary transition-colors backdrop-blur-sm touch-manipulation"
+              title="View episodes"
+              aria-label="View episodes"
+            >
+              <List className="w-4 h-4 text-white" />
+            </button>
+          )}
+
           <button
             type="button"
-            onClick={handleEpisodeView}
-            className="p-2 rounded-full bg-black/20 hover:bg-primary/80 transition-colors backdrop-blur-sm"
-            title="View episodes"
+            onClick={handleToggleWatched}
+            disabled={isLoading}
+            className={`p-2 rounded-full transition-colors backdrop-blur-sm touch-manipulation ${
+              displayWatched
+                ? "bg-success/80 hover:bg-success active:bg-success"
+                : "bg-white/20 hover:bg-white/40 active:bg-white/60"
+            } ${isLoading ? "opacity-50 cursor-not-allowed" : ""}`}
+            title={displayWatched ? "Mark as unwatched" : "Mark as watched"}
+            aria-label={
+              displayWatched ? "Mark as unwatched" : "Mark as watched"
+            }
           >
-            <List className="w-5 h-5 text-white" />
+            {displayWatched ? (
+              <EyeOff className="w-4 h-4 text-white" />
+            ) : (
+              <Eye className="w-4 h-4 text-white" />
+            )}
           </button>
-        )}
 
-        <button
-          type="button"
-          onClick={handleToggleWatched}
-          disabled={isLoading}
-          className={`p-2 rounded-full transition-colors backdrop-blur-sm ${
-            displayWatched
-              ? "bg-success/80 hover:bg-success"
-              : "bg-black/20 hover:bg-black/40"
-          } ${isLoading ? "opacity-50 cursor-not-allowed" : ""}`}
-          title={displayWatched ? "Mark as unwatched" : "Mark as watched"}
-        >
-          {displayWatched ? (
-            <EyeOff className="w-5 h-5 text-white" />
-          ) : (
-            <Eye className="w-5 h-5 text-white" />
-          )}
-        </button>
-
-        <button
-          type="button"
-          onClick={handleRemove}
-          className="p-2 rounded-full bg-black/20 hover:bg-red-500/80 transition-colors backdrop-blur-sm"
-          title="Remove from watchlist"
-        >
-          <Trash2 className="w-5 h-5 text-white" />
-        </button>
+          <button
+            type="button"
+            onClick={handleRemove}
+            className="p-2 rounded-full bg-white/20 hover:bg-red-500/80 active:bg-red-600/80 transition-colors backdrop-blur-sm touch-manipulation"
+            title="Remove from watchlist"
+            aria-label="Remove from watchlist"
+          >
+            <Trash2 className="w-4 h-4 text-white" />
+          </button>
+        </div>
       </div>
     </figure>
   );

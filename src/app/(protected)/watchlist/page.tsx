@@ -5,11 +5,13 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { useEffect, useState } from "react";
 import { MediaSkeletonGrid } from "@/app/(protected)/discover/_components/media-skeleton";
+import { Filters } from "@/components/ui/filters";
 import { useAuthStore } from "@/lib/stores/auth-store";
 import { useWatchlistStore } from "@/lib/stores/watchlist-store";
 import type { WatchlistItem } from "@/lib/types/database";
 import { EpisodeModal } from "./_components/episode-modal";
 import { WatchlistCard } from "./_components/watchlist-card";
+import { WatchlistCardList } from "./_components/watchlist-card-list";
 
 export default function Watchlist() {
   const { user, loading: authLoading } = useAuthStore();
@@ -18,6 +20,7 @@ export default function Watchlist() {
   const [filter, setFilter] = useState<"all" | "watched" | "unwatched">("all");
   const [typeFilter, setTypeFilter] = useState<"all" | "movie" | "tv">("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [selectedTVShow, setSelectedTVShow] = useState<WatchlistItem | null>(
     null,
   );
@@ -166,61 +169,36 @@ export default function Watchlist() {
           {/* Filters and Search */}
           <div className="mb-6 space-y-4">
             {/* Filters */}
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between bg-base-200 p-4 rounded-lg">
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
-                <span className="font-medium">Status:</span>
-                <div className="join space-x-2">
-                  <button
-                    type="button"
-                    className={`btn join-item btn-sm ${filter === "all" ? "btn-primary" : "btn-outline"}`}
-                    onClick={() => setFilter("all")}
-                  >
-                    All Items
-                  </button>
-                  <button
-                    type="button"
-                    className={`btn join-item btn-sm ${filter === "unwatched" ? "btn-primary" : "btn-outline"}`}
-                    onClick={() => setFilter("unwatched")}
-                  >
-                    Unwatched
-                  </button>
-                  <button
-                    type="button"
-                    className={`btn join-item btn-sm ${filter === "watched" ? "btn-primary" : "btn-outline"}`}
-                    onClick={() => setFilter("watched")}
-                  >
-                    Watched
-                  </button>
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
-                <span className="font-medium">Type:</span>
-                <div className="join space-x-2">
-                  <button
-                    type="button"
-                    className={`btn join-item btn-sm ${typeFilter === "all" ? "btn-primary" : "btn-outline"}`}
-                    onClick={() => setTypeFilter("all")}
-                  >
-                    All Types
-                  </button>
-                  <button
-                    type="button"
-                    className={`btn join-item btn-sm ${typeFilter === "movie" ? "btn-primary" : "btn-outline"}`}
-                    onClick={() => setTypeFilter("movie")}
-                  >
-                    Movies
-                  </button>
-                  <button
-                    type="button"
-                    className={`btn join-item btn-sm ${typeFilter === "tv" ? "btn-primary" : "btn-outline"}`}
-                    onClick={() => setTypeFilter("tv")}
-                  >
-                    Series
-                  </button>
-                </div>
-              </div>
-            </div>
+            <Filters
+              filterGroups={[
+                {
+                  key: "status",
+                  label: "Status",
+                  value: filter,
+                  onChange: (value) =>
+                    setFilter(value as "all" | "watched" | "unwatched"),
+                  options: [
+                    { value: "all", label: "All Items" },
+                    { value: "unwatched", label: "Unwatched" },
+                    { value: "watched", label: "Watched" },
+                  ],
+                },
+                {
+                  key: "type",
+                  label: "Type",
+                  value: typeFilter,
+                  onChange: (value) =>
+                    setTypeFilter(value as "all" | "movie" | "tv"),
+                  options: [
+                    { value: "all", label: "All Types" },
+                    { value: "movie", label: "Movies" },
+                    { value: "tv", label: "Series" },
+                  ],
+                },
+              ]}
+              viewMode={viewMode}
+              onViewModeChange={setViewMode}
+            />
             {/* Search */}
             <div className="form-control">
               <label className="input">
@@ -248,10 +226,20 @@ export default function Watchlist() {
                 Try adjusting your search or filter criteria
               </p>
             </div>
-          ) : (
+          ) : viewMode === "grid" ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {filteredItems.map((item) => (
                 <WatchlistCard
+                  key={item.id}
+                  item={item}
+                  onEpisodeView={handleEpisodeView}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {filteredItems.map((item) => (
+                <WatchlistCardList
                   key={item.id}
                   item={item}
                   onEpisodeView={handleEpisodeView}

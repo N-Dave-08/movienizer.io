@@ -3,7 +3,6 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { AppProviders } from "@/components/providers/app-providers";
 import Header from "@/components/ui/header";
-import { MobileModal } from "@/components/ui/mobile-modal";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -93,7 +92,6 @@ export default function RootLayout({
         <AppProviders>
           <Header />
           {children}
-          <MobileModal />
         </AppProviders>
       </body>
     </html>
