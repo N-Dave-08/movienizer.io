@@ -1,0 +1,39 @@
+-- WARNING: This schema is for context only and is not meant to be run.
+-- Table order and constraints may not be valid for execution.
+
+CREATE TABLE public.user_episodes (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL,
+  tmdb_id integer NOT NULL,
+  season_number integer NOT NULL,
+  episode_number integer NOT NULL,
+  watched boolean DEFAULT false,
+  watched_at timestamp with time zone,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT user_episodes_pkey PRIMARY KEY (id),
+  CONSTRAINT user_episodes_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id)
+);
+CREATE TABLE public.watchlist_items (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  user_id uuid,
+  tmdb_id integer NOT NULL,
+  media_type text NOT NULL CHECK (media_type = ANY (ARRAY['movie'::text, 'tv'::text])),
+  title text NOT NULL,
+  poster_path text,
+  overview text,
+  release_date date,
+  vote_average numeric,
+  added_at timestamp with time zone DEFAULT now(),
+  watched boolean DEFAULT false,
+  user_rating integer CHECK (user_rating >= 1 AND user_rating <= 5),
+  notes text,
+  total_episodes integer DEFAULT 0,
+  watched_episodes integer DEFAULT 0,
+  current_season integer DEFAULT 1,
+  current_episode integer DEFAULT 1,
+  last_watched_at timestamp with time zone,
+  watched_episodes_list jsonb DEFAULT '[]'::jsonb,
+  CONSTRAINT watchlist_items_pkey PRIMARY KEY (id),
+  CONSTRAINT watchlist_items_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id)
+);

@@ -9,8 +9,6 @@ export function useMediaCardState(item: Movie | TVShow, type: "movie" | "tv") {
     removeFromWatchlist,
     updateWatchlistItem,
     getWatchlistItem,
-    loadWatchlist,
-    initialized,
   } = useWatchlistStore();
 
   const [isLoading, setIsLoading] = useState(false);
@@ -29,13 +27,6 @@ export function useMediaCardState(item: Movie | TVShow, type: "movie" | "tv") {
   const actualWatched = watchlistItem?.watched || false;
   const displayWatched =
     optimisticWatched !== null ? optimisticWatched : actualWatched;
-
-  // Load watchlist on first mount
-  useEffect(() => {
-    if (!initialized) {
-      loadWatchlist();
-    }
-  }, [initialized, loadWatchlist]);
 
   // Reset optimistic states when actual states change
   useEffect(() => {

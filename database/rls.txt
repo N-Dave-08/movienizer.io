@@ -1,0 +1,74 @@
+[
+  {
+    "schemaname": "public",
+    "tablename": "user_episodes",
+    "policyname": "Users can delete own episodes",
+    "cmd": "DELETE",
+    "roles": "{public}",
+    "qual": "(auth.uid() = user_id)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "user_episodes",
+    "policyname": "Users can insert own episodes",
+    "cmd": "INSERT",
+    "roles": "{public}",
+    "qual": null,
+    "with_check": "(auth.uid() = user_id)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "user_episodes",
+    "policyname": "Users can update own episodes",
+    "cmd": "UPDATE",
+    "roles": "{public}",
+    "qual": "(auth.uid() = user_id)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "user_episodes",
+    "policyname": "Users can view own episodes",
+    "cmd": "SELECT",
+    "roles": "{public}",
+    "qual": "(auth.uid() = user_id)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "watchlist_items",
+    "policyname": "Users can delete own watchlist items",
+    "cmd": "DELETE",
+    "roles": "{public}",
+    "qual": "(auth.uid() = user_id)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "watchlist_items",
+    "policyname": "Users can insert own watchlist items",
+    "cmd": "INSERT",
+    "roles": "{public}",
+    "qual": null,
+    "with_check": "(auth.uid() = user_id)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "watchlist_items",
+    "policyname": "Users can update own watchlist items",
+    "cmd": "UPDATE",
+    "roles": "{public}",
+    "qual": "(auth.uid() = user_id)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "watchlist_items",
+    "policyname": "Users can view own watchlist items",
+    "cmd": "SELECT",
+    "roles": "{public}",
+    "qual": "(auth.uid() = user_id)",
+    "with_check": null
+  }
+]

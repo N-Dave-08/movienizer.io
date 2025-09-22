@@ -16,3 +16,11 @@
 // Data Fetching Rules:
 // - Always use TanStack React Query (tanstack/react-query) for all data fetching and caching in React components.
 // - Do not use alternative data fetching libraries or custom hooks for server state management.
+
+// Supabase Database and RLS Rules:
+// - Always refer to /database/schema.txt for the database schema in Supabase.
+// - Always refer to /database/rls.txt for Row Level Security (RLS) policies in Supabase.
+
+// Package Manager Rules:
+// - Always use pnpm as the package manager for all scripts, installs, and commands.
+// - Do not use npm, yarn, or other package managers.

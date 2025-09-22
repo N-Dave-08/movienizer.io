@@ -2,21 +2,19 @@
 
 import { Calendar, Eye, EyeOff, List, Trash2 } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { useState } from "react";
+import { useEpisodeProgress } from "@/lib/hooks/use-episode-progress";
 import { useWatchlistStore } from "@/lib/stores/watchlist-store";
 import { getImageUrl } from "@/lib/tmbd/tmdb";
-import type { EpisodeProgress, WatchlistItem } from "@/lib/types/database";
+import type { WatchlistItem } from "@/lib/types/database";
 import { ProgressIndicator } from "./progress-indicator";
 
 interface WatchlistCardListProps {
   item: WatchlistItem;
-  onEpisodeView?: (item: WatchlistItem) => void;
 }
 
-export function WatchlistCardList({
-  item,
-  onEpisodeView,
-}: WatchlistCardListProps) {
+export function WatchlistCardList({ item }: WatchlistCardListProps) {
   const { removeFromWatchlist, updateWatchlistItem } = useWatchlistStore();
   const [isLoading, setIsLoading] = useState(false);
   const [optimisticWatched, setOptimisticWatched] = useState<boolean | null>(
@@ -29,26 +27,16 @@ export function WatchlistCardList({
     ? new Date(item.release_date).getFullYear()
     : null;
 
+  // Get real-time episode progress for TV shows
+  const {
+    progress,
+    loading: progressLoading,
+    refresh: refreshProgress,
+  } = useEpisodeProgress(item.tmdb_id, item.media_type);
+
   // Use optimistic state if available, otherwise use actual state
   const displayWatched =
     optimisticWatched !== null ? optimisticWatched : item.watched;
-
-  // Calculate progress for TV shows
-  const progress: EpisodeProgress | null =
-    isTV && item.total_episodes
-      ? {
-          totalEpisodes: item.total_episodes,
-          watchedEpisodes: item.watched_episodes || 0,
-          currentSeason: item.current_season || 1,
-          currentEpisode: item.current_episode || 1,
-          progressPercentage:
-            item.total_episodes > 0
-              ? Math.round(
-                  ((item.watched_episodes || 0) / item.total_episodes) * 100,
-                )
-              : 0,
-        }
-      : null;
 
   const handleToggleWatched = async () => {
     if (isLoading) return;
@@ -60,6 +48,10 @@ export function WatchlistCardList({
     try {
       await updateWatchlistItem(item.id, { watched: newWatchedState });
       setOptimisticWatched(null);
+      // Refresh episode progress for TV shows
+      if (isTV) {
+        await refreshProgress();
+      }
     } catch {
       setOptimisticWatched(!newWatchedState);
     } finally {
@@ -69,12 +61,6 @@ export function WatchlistCardList({
 
   const handleRemove = async () => {
     await removeFromWatchlist(item.tmdb_id, item.media_type);
-  };
-
-  const handleEpisodeView = () => {
-    if (onEpisodeView) {
-      onEpisodeView(item);
-    }
   };
 
   return (
@@ -135,7 +121,11 @@ export function WatchlistCardList({
             !displayWatched &&
             progress.totalEpisodes > 0 && (
               <div className="mb-2">
-                <ProgressIndicator progress={progress} compact />
+                <ProgressIndicator
+                  progress={progress}
+                  compact
+                  isLoading={progressLoading || isLoading}
+                />
               </div>
             )}
         </div>
@@ -143,15 +133,14 @@ export function WatchlistCardList({
         {/* Action buttons */}
         <div className="flex items-center  gap-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200">
           {isTV && (
-            <button
-              type="button"
-              onClick={handleEpisodeView}
+            <Link
+              href={`/watchlist/${item.id}/episodes`}
               className="p-2 rounded-full bg-base-300 hover:bg-primary/80 active:bg-primary transition-colors touch-manipulation"
               title="View episodes"
               aria-label="View episodes"
             >
               <List className="w-4 h-4" />
-            </button>
+            </Link>
           )}
 
           <button

@@ -25,6 +25,7 @@
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "schema-dts": "^1.1.5",
+    "use-debounce": "^10.0.6",
     "zod": "^4.1.8",
     "zustand": "^5.0.8"
   },

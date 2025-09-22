@@ -29,6 +29,10 @@ interface WatchlistState {
     tmdbId: number,
     mediaType: "movie" | "tv",
   ) => WatchlistItem | null;
+  refreshWatchlistItem: (
+    tmdbId: number,
+    mediaType: "movie" | "tv",
+  ) => Promise<void>;
   clearError: () => void;
 }
 
@@ -84,9 +88,6 @@ export const useWatchlistStore = create<WatchlistState>((set, get) => ({
       notes: null,
       // Initialize episode tracking fields for TV shows
       total_episodes: type === "tv" ? 0 : undefined,
-      watched_episodes: type === "tv" ? (watched ? 0 : 0) : undefined,
-      current_season: type === "tv" ? 1 : undefined,
-      current_episode: type === "tv" ? 1 : undefined,
       last_watched_at: watched ? new Date().toISOString() : undefined,
     };
 
@@ -214,6 +215,36 @@ export const useWatchlistStore = create<WatchlistState>((set, get) => ({
         (item) => item.tmdb_id === tmdbId && item.media_type === mediaType,
       ) || null
     );
+  },
+
+  refreshWatchlistItem: async (tmdbId: number, mediaType: "movie" | "tv") => {
+    const state = get();
+    const itemToRefresh = state.items.find(
+      (i) => i.tmdb_id === tmdbId && i.media_type === mediaType,
+    );
+
+    if (!itemToRefresh) return;
+
+    try {
+      const refreshedItem = await watchlistService.getWatchlistItem(
+        tmdbId,
+        mediaType,
+      );
+      set((state) => ({
+        items: state.items.map((i) =>
+          i.id === itemToRefresh.id ? refreshedItem : i,
+        ),
+      }));
+    } catch (error) {
+      // Revert optimistic update on error
+      set((state) => ({
+        items: state.items.map((i) =>
+          i.id === itemToRefresh.id ? itemToRefresh : i,
+        ),
+        error:
+          error instanceof Error ? error.message : "Failed to refresh item",
+      }));
+    }
   },
 
   clearError: () => set({ error: null }),

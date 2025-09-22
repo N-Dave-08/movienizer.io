@@ -1,6 +1,5 @@
 import { Eye, EyeOff, Star } from "lucide-react";
 import Image from "next/image";
-import { toggleEpisodeWatched } from "@/lib/episodes/simple-episode-service";
 import { getImageUrl } from "@/lib/tmbd/tmdb";
 import type { SimpleEpisode } from "@/lib/types/database";
 
@@ -14,40 +13,17 @@ interface EpisodeCardProps {
   ) => void;
 }
 
-export function EpisodeCard({
-  episode,
-  tvId,
-  onEpisodeToggle,
-}: EpisodeCardProps) {
-  const handleToggleWatched = async () => {
+export function EpisodeCard({ episode, onEpisodeToggle }: EpisodeCardProps) {
+  const handleToggleWatched = () => {
     const newWatchedState = !episode.watched;
 
-    // Optimistic update is handled by parent
+    // Delegate to parent component
     if (onEpisodeToggle) {
       onEpisodeToggle(
         episode.season_number,
         episode.episode_number,
         newWatchedState,
       );
-    }
-
-    try {
-      await toggleEpisodeWatched(
-        tvId,
-        episode.season_number,
-        episode.episode_number,
-        newWatchedState,
-      );
-    } catch (error) {
-      console.error("Failed to update episode:", error);
-      // Revert in parent
-      if (onEpisodeToggle) {
-        onEpisodeToggle(
-          episode.season_number,
-          episode.episode_number,
-          episode.watched,
-        );
-      }
     }
   };
 

@@ -3,6 +3,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useAuthStore } from "@/lib/stores/auth-store";
+import { useWatchlistStore } from "@/lib/stores/watchlist-store";
 
 interface AppProvidersProps {
   children: React.ReactNode;
@@ -43,10 +44,25 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+function WatchlistProvider({ children }: { children: React.ReactNode }) {
+  const user = useAuthStore((state) => state.user);
+  const { loadWatchlist, initialized } = useWatchlistStore();
+
+  useEffect(() => {
+    if (user && !initialized) {
+      loadWatchlist();
+    }
+  }, [user, initialized, loadWatchlist]);
+
+  return <>{children}</>;
+}
+
 export function AppProviders({ children }: AppProvidersProps) {
   return (
     <QueryProvider>
-      <AuthProvider>{children}</AuthProvider>
+      <AuthProvider>
+        <WatchlistProvider>{children}</WatchlistProvider>
+      </AuthProvider>
     </QueryProvider>
   );
 }

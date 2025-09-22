@@ -1,6 +1,9 @@
 "use client";
 
-import { markShowFullyWatched } from "@/lib/episodes/simple-episode-service";
+import {
+  clearEpisodesForShow,
+  markShowFullyWatched,
+} from "@/lib/episodes/episode-service";
 import { createClient } from "@/lib/supabase/client";
 import { getTVShowWithSeasons } from "@/lib/tmbd/api";
 import type {
@@ -13,7 +16,7 @@ import type {
  * Watchlist Service
  *
  * Provides functions for managing user's watchlist items in Supabase.
- * All functions handle authentication and provide proper error handling.
+ * Now uses the new episode tracking system with user_episodes table.
  */
 
 export async function addToWatchlist(
@@ -32,7 +35,7 @@ export async function addToWatchlist(
   const { data, error } = await supabase
     .from("watchlist_items")
     .insert({
-      user_id: user.id, // Explicitly set the user_id
+      user_id: user.id,
       tmdb_id: item.tmdb_id,
       media_type: item.media_type,
       title: item.title,
@@ -77,8 +80,19 @@ export async function addToWatchlist(
 export async function removeFromWatchlist(
   tmdbId: number,
   mediaType: "movie" | "tv",
+  clearEpisodes = false,
 ): Promise<void> {
   const supabase = createClient();
+
+  // Clear episode data if requested (for TV shows)
+  if (clearEpisodes && mediaType === "tv") {
+    try {
+      await clearEpisodesForShow(tmdbId);
+    } catch (error) {
+      console.error("Failed to clear episodes:", error);
+      // Continue with watchlist removal even if episode cleanup fails
+    }
+  }
 
   const { error } = await supabase
     .from("watchlist_items")
@@ -94,16 +108,54 @@ export async function removeFromWatchlist(
 export async function getWatchlist(): Promise<WatchlistItem[]> {
   const supabase = createClient();
 
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    throw new Error("User not authenticated");
+  }
+
   const { data, error } = await supabase
     .from("watchlist_items")
     .select("*")
+    .eq("user_id", user.id)
     .order("added_at", { ascending: false });
 
   if (error) {
-    throw new Error(`Failed to fetch watchlist: ${error.message}`);
+    throw new Error(`Failed to load watchlist: ${error.message}`);
   }
 
   return data || [];
+}
+
+export async function getWatchlistItem(
+  tmdbId: number,
+  mediaType: "movie" | "tv",
+): Promise<WatchlistItem> {
+  const supabase = createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    throw new Error("User not authenticated");
+  }
+
+  const { data, error } = await supabase
+    .from("watchlist_items")
+    .select("*")
+    .eq("user_id", user.id)
+    .eq("tmdb_id", tmdbId)
+    .eq("media_type", mediaType)
+    .single();
+
+  if (error) {
+    throw new Error(`Failed to load watchlist item: ${error.message}`);
+  }
+
+  return data;
 }
 
 export async function updateWatchlistItem(
@@ -135,17 +187,18 @@ export async function updateWatchlistItem(
   if (currentItem.media_type === "tv" && updates.watched !== undefined) {
     try {
       if (updates.watched) {
-        // Mark all episodes as watched using the simplified service
+        // Mark all episodes as watched using the new episode service
         const totalEpisodes = currentItem.total_episodes || 0;
         if (totalEpisodes > 0) {
-          await markShowFullyWatched(currentItem.tmdb_id, totalEpisodes);
+          const _result = await markShowFullyWatched(
+            currentItem.tmdb_id,
+            totalEpisodes,
+          );
+          // The database function already handles updating the watchlist item
         }
       } else {
-        // Mark all episodes as unwatched - just clear the list
-        updates.watched_episodes_list = [];
-        updates.watched_episodes = 0;
-        updates.current_season = 1;
-        updates.current_episode = 1;
+        // Clear all episodes when marking as unwatched
+        await clearEpisodesForShow(currentItem.tmdb_id);
       }
     } catch (episodeError) {
       console.error("Failed to update TV show episodes:", episodeError);
@@ -223,14 +276,19 @@ export async function addTVShowAsWatched(
     try {
       const totalEpisodes = watchlistItem.total_episodes || 0;
       if (totalEpisodes > 0) {
-        await markShowFullyWatched(item.tmdb_id, totalEpisodes);
+        const _result = await markShowFullyWatched(item.tmdb_id, totalEpisodes);
+        // The database function already handles updating the watchlist item
       }
 
-      // Fetch the updated item
+      // Update the watchlist item to mark as watched
       const { data: updatedItem } = await supabase
         .from("watchlist_items")
-        .select("*")
+        .update({
+          watched: true,
+          last_watched_at: new Date().toISOString(),
+        })
         .eq("id", watchlistItem.id)
+        .select()
         .single();
 
       return updatedItem || watchlistItem;

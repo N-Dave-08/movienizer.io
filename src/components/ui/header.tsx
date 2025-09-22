@@ -3,21 +3,13 @@
 import { Bookmark, LogOut, Search, User } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
 import { useAuthStore } from "@/lib/stores/auth-store";
 import { useWatchlistStore } from "@/lib/stores/watchlist-store";
 
 export default function Header() {
   const router = useRouter();
   const { user, loading, signOut } = useAuthStore();
-  const { items, loadWatchlist, initialized } = useWatchlistStore();
-
-  // Load watchlist when user is available
-  useEffect(() => {
-    if (user && !initialized) {
-      loadWatchlist();
-    }
-  }, [user, initialized, loadWatchlist]);
+  const { items } = useWatchlistStore();
 
   const handleSignOut = async () => {
     await signOut(() => {
