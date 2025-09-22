@@ -110,7 +110,7 @@ export default function Header() {
                   <Link href="/login">Login</Link>
                 </button>
                 <button type="button" className="btn btn-primary">
-                  <Link href="/register">Register</Link>
+                  <Link href="/signup">Register</Link>
                 </button>
               </>
             )}
