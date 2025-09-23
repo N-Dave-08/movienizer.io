@@ -22,7 +22,7 @@ interface FiltersProps {
 
 export function Filters({
   filterGroups,
-  viewMode = "grid",
+  viewMode = "list",
   onViewModeChange,
   showViewToggle = true,
 }: FiltersProps) {
@@ -108,7 +108,7 @@ export function Filters({
         {showViewToggle && onViewModeChange && (
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
             <span className="font-medium">View:</span>
-            <div className="join">
+            <div className="join space-x-2">
               <button
                 type="button"
                 className={`btn join-item btn-sm ${viewMode === "grid" ? "btn-primary" : "btn-outline"}`}

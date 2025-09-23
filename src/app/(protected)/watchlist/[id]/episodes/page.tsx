@@ -10,7 +10,7 @@ import {
   getSeasonsForShow,
   toggleEpisodeWatched,
   toggleSeasonWatched,
-} from "@/lib/episodes/episode-service";
+} from "@/lib/services/episode-service";
 import { useWatchlistStore } from "@/lib/stores/watchlist-store";
 import type {
   SimpleEpisode,

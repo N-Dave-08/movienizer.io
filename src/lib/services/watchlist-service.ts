@@ -3,7 +3,7 @@
 import {
   clearEpisodesForShow,
   markShowFullyWatched,
-} from "@/lib/episodes/episode-service";
+} from "@/lib/services/episode-service";
 import { createClient } from "@/lib/supabase/client";
 import { getTVShowWithSeasons } from "@/lib/tmbd/api";
 import type {

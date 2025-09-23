@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getWatchlistProgress } from "@/lib/episodes/episode-service";
+import { getWatchlistProgress } from "@/lib/services/episode-service";
 import type { EpisodeProgress } from "@/lib/types/database";
 
 /**

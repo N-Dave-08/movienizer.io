@@ -1,7 +1,7 @@
 import { create } from "zustand";
+import * as watchlistService from "@/lib/services/watchlist-service";
 import type { Movie, TVShow } from "@/lib/tmbd/tmdb";
 import type { WatchlistItem } from "@/lib/types/database";
-import * as watchlistService from "@/lib/watchlist/watchlist-service";
 
 interface WatchlistState {
   items: WatchlistItem[];
