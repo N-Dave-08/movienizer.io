@@ -31,10 +31,13 @@ export default function Header() {
   };
 
   return (
-    <header className="flex items-center justify-center -mb-18 sticky md:top-4 z-50">
-      <nav className="py-3 px-6 w-7xl md:rounded-box shadow-lg bg-base-100/70 backdrop-blur-2xl">
+    <header className="flex items-center justify-center -mb-18 sticky top-0 md:top-4 z-50">
+      <nav className="md:py-3 md:px-6 w-7xl md:rounded-box shadow-lg bg-base-100/70 backdrop-blur-2xl">
         <div className="flex items-center justify-between">
-          <button type="button" className="btn btn-ghost btn-lg font-bold">
+          <button
+            type="button"
+            className="btn btn-ghost md:btn-lg btn-md md:font-bold font-semibold"
+          >
             <Link href="/"> Moviefy</Link>
           </button>
 
@@ -43,17 +46,17 @@ export default function Header() {
               <>
                 <Link
                   href="/discover"
-                  className="btn btn-ghost btn-circle"
+                  className="btn btn-ghost btn-circle btn-sm md:btn-md"
                   title="Discover Movies & Series"
                 >
-                  <Search className="h-5 w-5" />
+                  <Search className="h-4 w-4 md:h-5 md:w-5" />
                 </Link>
                 <Link
                   href="/watchlist"
-                  className="btn btn-ghost btn-circle relative"
+                  className="btn btn-ghost btn-circle btn-sm md:btn-md relative"
                   title="My Watchlist"
                 >
-                  <Bookmark className="h-5 w-5" />
+                  <Bookmark className="h-4 w-4 md:h-5 md:w-5" />
                   {items.length > 0 && (
                     <div className="badge badge-sm badge-primary absolute -top-1 -right-1">
                       {items.length > 99 ? "99+" : items.length}
@@ -67,8 +70,11 @@ export default function Header() {
               <span className="loading loading-spinner loading-sm"></span>
             ) : user ? (
               <div className="dropdown dropdown-end">
-                <button type="button" className="btn btn-ghost btn-circle">
-                  <User className="h-5 w-5" />
+                <button
+                  type="button"
+                  className="btn btn-ghost btn-circle btn-sm md:btn-md"
+                >
+                  <User className="h-4 w-4 md:h-5 md:w-5" />
                 </button>
                 <ul className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
                   <li>

@@ -90,11 +90,7 @@ export default function LoginForm() {
         },
       });
 
-      console.log("Magic link sent to:", email);
-      console.log("Redirect URL:", `${window.location.origin}/auth/callback`);
-
       if (error) {
-        console.error("Failed to send magic link:", error);
         throw new Error(error.message);
       }
 

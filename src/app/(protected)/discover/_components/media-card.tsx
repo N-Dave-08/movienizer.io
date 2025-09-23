@@ -4,7 +4,6 @@ import Image from "next/image";
 import { getImageUrl, type Movie, type TVShow } from "@/lib/tmbd/tmdb";
 import { useMediaCardState } from "../_hooks/use-media-card-state";
 import { MediaCardButtons } from "./media-card-buttons";
-import { WatchedOverlay } from "./watched-overlay";
 
 interface MediaCardProps {
   item: Movie | TVShow;
@@ -42,16 +41,26 @@ export function MediaCard({ item, type }: MediaCardProps) {
         </div>
       )}
 
-      <WatchedOverlay isWatched={displayWatched} />
+      {/* Watched overlay */}
+      {displayWatched && (
+        <div className="absolute inset-0 bg-black/60 flex items-center justify-center rounded-sm">
+          <div className="bg-success text-success-content px-3 py-1 rounded-full text-sm font-medium">
+            Watched
+          </div>
+        </div>
+      )}
 
-      <MediaCardButtons
-        displayWatched={displayWatched}
-        displayInWatchlist={displayInWatchlist}
-        isLoading={isLoading}
-        isWatchedLoading={isWatchedLoading}
-        onToggleWatched={handleToggleWatched}
-        onToggleWatchlist={handleToggleWatchlist}
-      />
+      {/* Bottom Action Bar - Mobile-friendly */}
+      <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/90 via-black/60 to-transparent opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200">
+        <MediaCardButtons
+          displayWatched={displayWatched}
+          displayInWatchlist={displayInWatchlist}
+          isLoading={isLoading}
+          isWatchedLoading={isWatchedLoading}
+          onToggleWatched={handleToggleWatched}
+          onToggleWatchlist={handleToggleWatchlist}
+        />
+      </div>
     </figure>
   );
 }

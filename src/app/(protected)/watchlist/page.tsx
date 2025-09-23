@@ -4,7 +4,7 @@ import { Filter, Popcorn, Search } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { useEffect, useState } from "react";
-import { MediaSkeletonGrid } from "@/app/(protected)/discover/_components/media-skeleton";
+import { CardSkeletonListGrid } from "@/app/(protected)/_components/card-skeleton-list";
 import { Filters } from "@/components/ui/filters";
 import { useAuthStore } from "@/lib/stores/auth-store";
 import { useWatchlistStore } from "@/lib/stores/watchlist-store";
@@ -18,7 +18,7 @@ export default function Watchlist() {
   const [filter, setFilter] = useState<"all" | "watched" | "unwatched">("all");
   const [typeFilter, setTypeFilter] = useState<"all" | "movie" | "tv">("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("list");
 
   // Clear error when component unmounts
   useEffect(() => {
@@ -57,7 +57,7 @@ export default function Watchlist() {
         </div>
 
         {/* Skeleton Grid */}
-        <MediaSkeletonGrid count={4} />
+        <CardSkeletonListGrid count={4} />
       </>
     );
   }
@@ -190,7 +190,7 @@ export default function Watchlist() {
 
           {/* Results */}
           {loading ? (
-            <MediaSkeletonGrid count={4} />
+            <CardSkeletonListGrid count={4} />
           ) : filteredItems.length === 0 ? (
             <div className="text-center py-12">
               <Filter className="w-12 h-12 mx-auto text-base-content/50 mb-4" />

@@ -92,15 +92,15 @@ export function WatchlistCardList({ item }: WatchlistCardListProps) {
         )} */}
       </div>
 
-      <div className=" w-full">
+      <div className="flex-1 min-w-0">
         {/* Content */}
-        <div className="flex-1 min-w-0 ">
-          <div className="flex items-center justify-between w-full">
-            <h3 className="font-semibold text-lg truncate mb-1">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-1">
+            <h3 className="font-semibold text-lg truncate flex-1 min-w-0">
               {item.title}
             </h3>
             <span
-              className={`badge badge-sm ${isTV ? "badge-secondary" : "badge-accent"}`}
+              className={`badge badge-sm flex-shrink-0 ${isTV ? "badge-secondary" : "badge-accent"}`}
             >
               {isTV ? "Series" : "Movie"}
             </span>
@@ -130,8 +130,8 @@ export function WatchlistCardList({ item }: WatchlistCardListProps) {
             )}
         </div>
 
-        {/* Action buttons */}
-        <div className="flex items-center  gap-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200">
+        {/* Action buttons - always visible in list mode */}
+        <div className="flex items-center gap-2 opacity-100 transition-opacity duration-200">
           {isTV && (
             <Link
               href={`/watchlist/${item.id}/episodes`}

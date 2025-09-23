@@ -22,7 +22,7 @@ interface FiltersProps {
 
 export function Filters({
   filterGroups,
-  viewMode = "list",
+  viewMode,
   onViewModeChange,
   showViewToggle = true,
 }: FiltersProps) {
@@ -33,7 +33,7 @@ export function Filters({
         <div className="flex items-center justify-between">
           <span className="font-medium">Filters</span>
           {showViewToggle && onViewModeChange && (
-            <div className="join">
+            <div className="join space-x-2">
               <button
                 type="button"
                 className={`btn join-item btn-sm ${viewMode === "grid" ? "btn-primary" : "btn-outline"}`}
